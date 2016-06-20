@@ -84,7 +84,7 @@ trait GameDef {
    * This function returns the block at the start position of
    * the game.
    */
-  def startBlock: Block = ???
+  def startBlock: Block = Block(startPos, startPos)
 
 
   /**
@@ -98,59 +98,59 @@ trait GameDef {
     require(b1.x <= b2.x && b1.y <= b2.y, "Invalid block position: b1=" + b1 + ", b2=" + b2)
 
     /**
-     * Returns a block where the `x` coordinates of `b1` and `b2` are
-     * changed by `d1` and `d2`, respectively.
-     */
+      * Returns a block where the `x` coordinates of `b1` and `b2` are
+      * changed by `d1` and `d2`, respectively.
+      */
     def dx(d1: Int, d2: Int) = Block(b1.dx(d1), b2.dx(d2))
 
     /**
-     * Returns a block where the `y` coordinates of `b1` and `b2` are
-     * changed by `d1` and `d2`, respectively.
-     */
+      * Returns a block where the `y` coordinates of `b1` and `b2` are
+      * changed by `d1` and `d2`, respectively.
+      */
     def dy(d1: Int, d2: Int) = Block(b1.dy(d1), b2.dy(d2))
 
 
     /** The block obtained by moving left */
-    def left = if (isStanding)         dy(-2, -1)
-               else if (b1.x == b2.x)  dy(-1, -2)
-               else                    dy(-1, -1)
+    def left = if (isStanding) dy(-2, -1)
+    else if (b1.x == b2.x) dy(-1, -2)
+    else dy(-1, -1)
 
     /** The block obtained by moving right */
-    def right = if (isStanding)        dy(1, 2)
-                else if (b1.x == b2.x) dy(2, 1)
-                else                   dy(1, 1)
+    def right = if (isStanding) dy(1, 2)
+    else if (b1.x == b2.x) dy(2, 1)
+    else dy(1, 1)
 
     /** The block obtained by moving up */
-    def up = if (isStanding)           dx(-2, -1)
-             else if (b1.x == b2.x)    dx(-1, -1)
-             else                      dx(-1, -2)
+    def up = if (isStanding) dx(-2, -1)
+    else if (b1.x == b2.x) dx(-1, -1)
+    else dx(-1, -2)
 
     /** The block obtained by moving down */
-    def down = if (isStanding)         dx(1, 2)
-               else if (b1.x == b2.x)  dx(1, 1)
-               else                    dx(2, 1)
+    def down = if (isStanding) dx(1, 2)
+    else if (b1.x == b2.x) dx(1, 1)
+    else dx(2, 1)
 
 
     /**
-     * Returns the list of blocks that can be obtained by moving
-     * the current block, together with the corresponding move.
-     */
-    def neighbors: List[(Block, Move)] = ???
+      * Returns the list of blocks that can be obtained by moving
+      * the current block, together with the corresponding move.
+      */
+    def neighbors: List[(Block, Move)] = List((left, Left), (right, Right), (up, Up), (down, Down))
 
     /**
-     * Returns the list of positions reachable from the current block
-     * which are inside the terrain.
-     */
-    def legalNeighbors: List[(Block, Move)] = ???
+      * Returns the list of positions reachable from the current block
+      * which are inside the terrain.
+      */
+    def legalNeighbors: List[(Block, Move)] = neighbors filter (step => step._1.isLegal)
 
     /**
-     * Returns `true` if the block is standing.
-     */
-    def isStanding: Boolean = ???
+      * Returns `true` if the block is standing.
+      */
+    def isStanding: Boolean = b1.x == b2.x && b1.y == b2.y
 
     /**
-     * Returns `true` if the block is entirely inside the terrain.
-     */
-    def isLegal: Boolean = ???
+      * Returns `true` if the block is entirely inside the terrain.
+      */
+    def isLegal: Boolean = terrain(b1) && terrain(b2)
   }
 }
