@@ -1,10 +1,12 @@
 package broker
 
+import java.util.concurrent.Callable
 
 
-trait BigIntHeap extends Heap {
-  override type A = BigInt
-  override def ord = scala.math.Ordering.BigInt
+
+trait TasksHeap[V] extends Heap {
+  override type A = (BigInt, List[Callable[V]])
+  override def ord = Ordering.by(_._1)
 }
 
 
