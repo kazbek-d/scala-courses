@@ -28,9 +28,7 @@ object Simulate extends App with SimpleSimulate {
   private val dispatcher = system.actorOf(Props[TaskDispatcher], "task-dispatcher")
   system.scheduler.schedule(0 seconds, 1 seconds, new Runnable {
     override def run(): Unit = {
-      dispatcher ! newSimpleTask
-      dispatcher ! newSimpleTask
-      dispatcher ! newSimpleTask
+      1 to 5 foreach { _ => dispatcher ! newSimpleTask }
     }
   })
 
