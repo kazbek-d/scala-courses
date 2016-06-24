@@ -6,6 +6,7 @@ import scala.concurrent.Future
 
 
 case class Task(id: LocalDateTime, callable: Callable[Unit])
+case class Tick()
 
 
 
@@ -20,7 +21,3 @@ trait TasksHeap extends BinomialHeap {
 }
 
 
-
-abstract class AbstractDispatcher {
-  def Add(task: Task) : Unit
-}
