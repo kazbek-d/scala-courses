@@ -11,7 +11,7 @@ import ExecutionContext.Implicits.global
 import scala.io.StdIn
 
 
-object Simulate extends App with SimpleSimulate {
+object Simulate extends App {
   println("************   Broker Start   ************")
   println("        Press any key for exit")
 
@@ -34,6 +34,10 @@ object Simulate extends App with SimpleSimulate {
 
   StdIn.readLine()
 
+  dispatcher ! Stop
+  system stop dispatcher
+  system terminate
+
   println("******************************************")
 }
 
@@ -45,18 +49,25 @@ object Simulate extends App with SimpleSimulate {
 
 
 
-trait SimpleSimulate {
+//trait SimpleSimulate {
 
   class TaskDispatcher extends Actor with ActorLogging with TasksHeap {
     var h : H = empty
     private val worker = context.actorOf(Props[TaskWorker], "task-worker")
 
     override def receive: Receive = {
+      case Stop => {
+        log.info("Stop")
+        context stop worker
+        context stop self
+      }
       case task@Task(_, _) => {
+        log.info(task.id.toString)
         h = insert(task, h)
       }
       case Tick => {
         if(!isEmpty(h)) {
+          log.info("tick")
           val min = findMin(h)
           worker ! min
           h = deleteMin(h)
@@ -72,7 +83,7 @@ trait SimpleSimulate {
       case Task(_, callable) => callable.call()
     }
   }
-}
+//}
 
 
 

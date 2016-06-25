@@ -2,11 +2,11 @@ package broker
 
 import java.time.LocalDateTime
 import java.util.concurrent.Callable
-import scala.concurrent.Future
 
 
 case class Task(id: LocalDateTime, callable: Callable[Unit])
 case class Tick()
+case class Stop()
 
 
 
