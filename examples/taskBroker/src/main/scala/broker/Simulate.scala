@@ -16,7 +16,7 @@ object Simulate extends App {
   println("        Press any key for exit")
 
 
-  def currentTime: LocalDateTime = LocalDateTime.now()
+  def currentTime: LocalDateTime = LocalDateTime.now
   def newSimpleTask: Task = Task(currentTime, new Callable[Unit] {
     override def call(): Unit = {
       println(" Task id: " + currentTime)
@@ -29,6 +29,12 @@ object Simulate extends App {
   system.scheduler.schedule(0 seconds, 1 seconds, new Runnable {
     override def run(): Unit = {
       1 to 5 foreach { _ => dispatcher ! newSimpleTask }
+    }
+  })
+
+  system.scheduler.schedule(0 milliseconds, 10 milliseconds, new Runnable {
+    override def run(): Unit = {
+      dispatcher ! Tick
     }
   })
 
@@ -52,7 +58,7 @@ object Simulate extends App {
 //trait SimpleSimulate {
 
   class TaskDispatcher extends Actor with ActorLogging with TasksHeap {
-    var h : H = empty
+    var h: H = empty
     private val worker = context.actorOf(Props[TaskWorker], "task-worker")
 
     override def receive: Receive = {
@@ -66,12 +72,28 @@ object Simulate extends App {
         h = insert(task, h)
       }
       case Tick => {
-        if(!isEmpty(h)) {
-          log.info("tick")
-          val min = findMin(h)
-          worker ! min
-          h = deleteMin(h)
+
+        @annotation.tailrec
+        def loop(counter: Int): Unit = if (counter > 0) {
+          if (isEmpty(h)) {
+
+          } else {
+            val min = findMin(h)
+            val now = LocalDateTime.now
+            if (min.id.isBefore(now)) {
+              worker ! min
+              h = deleteMin(h)
+              loop(counter - 1)
+            } else {
+              log.info("tick. no appropiat tasks")
+            }
+          }
+
+        } else {
+          log.info("tick. limited by counter")
         }
+
+        loop(10)
       }
     }
   }
@@ -80,7 +102,8 @@ object Simulate extends App {
 
   class TaskWorker extends Actor with ActorLogging {
     override def receive: Receive = {
-      case Task(_, callable) => callable.call()
+      case Task(_, callable) =>
+        callable.call()
     }
   }
 //}
