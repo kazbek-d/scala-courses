@@ -16,8 +16,6 @@ trait TasksHeap extends BinomialHeap {
   override type A = Task
 
   override def ord = Ordering.by(_.id)
-
-  override def insert(x: A, ts: H) = super.insert(x, ts)
 }
 
 

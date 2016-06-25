@@ -16,7 +16,7 @@ object Simulate extends App {
   println("        Press any key for exit")
 
 
-  def currentTime: LocalDateTime = LocalDateTime.now
+  def currentTime: LocalDateTime = LocalDateTime.now plusSeconds 15
   def newSimpleTask: Task = Task(currentTime, new Callable[Unit] {
     override def call(): Unit = {
       println(" Task id: " + currentTime)
@@ -55,58 +55,55 @@ object Simulate extends App {
 
 
 
-//trait SimpleSimulate {
+class TaskDispatcher extends Actor with ActorLogging with TasksHeap {
+  var h: H = empty
+  private val worker = context.actorOf(Props[TaskWorker], "task-worker")
 
-  class TaskDispatcher extends Actor with ActorLogging with TasksHeap {
-    var h: H = empty
-    private val worker = context.actorOf(Props[TaskWorker], "task-worker")
-
-    override def receive: Receive = {
-      case Stop => {
-        log.info("Stop")
-        context stop worker
-        context stop self
-      }
-      case task@Task(_, _) => {
-        log.info(task.id.toString)
-        h = insert(task, h)
-      }
-      case Tick => {
-
-        @annotation.tailrec
-        def loop(counter: Int): Unit = if (counter > 0) {
-          if (isEmpty(h)) {
-
-          } else {
-            val min = findMin(h)
-            val now = LocalDateTime.now
-            if (min.id.isBefore(now)) {
-              worker ! min
-              h = deleteMin(h)
-              loop(counter - 1)
-            } else {
-              log.info("tick. no appropiat tasks")
-            }
-          }
-
+  override def receive: Receive = {
+    case Stop => {
+      log.info("Stop")
+      context stop worker
+      context stop self
+    }
+    case task@Task(_, _) => {
+      log.info(task.id.toString)
+      h = insert(task, h)
+    }
+    case Tick => {
+      @annotation.tailrec
+      def loop(counter: Int): Unit = if (counter > 0) {
+        if (isEmpty(h)) {
+          // log.info("tick. empty head")
         } else {
-          log.info("tick. limited by counter")
+          val min = findMin(h)
+          val now = LocalDateTime.now
+          if (min.id.isBefore(now)) {
+            worker ! min
+            h = deleteMin(h)
+            loop(counter - 1)
+          } else {
+            // log.info("tick. there aren't appropriate tasks")
+          }
         }
-
-        loop(10)
+      } else {
+        log.info("tick. limited by counter")
       }
+
+      loop(10)
     }
   }
+}
 
 
 
-  class TaskWorker extends Actor with ActorLogging {
-    override def receive: Receive = {
-      case Task(_, callable) =>
-        callable.call()
-    }
+class TaskWorker extends Actor with ActorLogging {
+  override def receive: Receive = {
+    case Task(_, callable) =>
+      def currentTime: LocalDateTime = LocalDateTime.now
+      println(s"current time = $currentTime")
+      callable.call()
   }
-//}
+}
 
 
 
