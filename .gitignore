@@ -42,3 +42,16 @@ coursera/functional-program-design/calculator/.idea/modules/root-build.iml
 coursera/functional-program-design/calculator/.idea/modules/root.iml
 coursera/functional-program-design/calculator/.idea/modules/webUI-build.iml
 coursera/functional-program-design/calculator/.idea/modules/webUI.iml
+coursera/functional-program-design/calculator/.idea/vcs.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__junit_junit_4_10_jar.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__org_hamcrest_hamcrest_core_1_1_jar.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__org_scala_js_scalajs_dom_sjs0_6_2_11_0_8_0_jar.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__org_scala_js_scalajs_library_2_11_0_6_2_jar.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__org_scala_lang_modules_scala_parser_combinators_2_11_1_0_2_jar.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__org_scala_lang_modules_scala_xml_2_11_1_0_2_jar.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__org_scala_lang_scala_library_2_11_6_jar.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__org_scala_lang_scala_library_2_11_7_jar.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__org_scala_lang_scala_reflect_2_11_2_jar.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__org_scala_sbt_test_interface_1_0_jar.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__org_scalacheck_scalacheck_2_11_1_12_1_jar.xml
+coursera/functional-program-design/calculator/.idea/libraries/SBT__org_scalatest_scalatest_2_11_2_2_4_jar.xml
