@@ -2,6 +2,7 @@
 *.log
 */.idea/
 */.idea/*
+.idea
 # sbt specific
 .cache
 .history
