@@ -22,6 +22,10 @@ class BlurSuite extends FunSuite {
 
   test("boxBlurKernel should return the correct value on an interior pixel " +
     "of a 3x4 image with radius 1") {
+
+//    println(" r:" +red(12)  + " g:" + green(12) + " b:" + blue(12) + " a:" + alpha(12))
+//    println(" r:" +red(4)  + " g:" + green(4) + " b:" + blue(4) + " a:" + alpha(4))
+
     val src = new Img(3, 4)
     src(0, 0) = 0; src(1, 0) = 1; src(2, 0) = 2
     src(0, 1) = 3; src(1, 1) = 4; src(2, 1) = 5
