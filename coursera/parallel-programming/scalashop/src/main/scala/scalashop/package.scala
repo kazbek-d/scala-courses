@@ -41,9 +41,9 @@ package object scalashop {
   def boxBlurKernel(src: Img, x: Int, y: Int, radius: Int): RGBA = {
 
     val xMin = if (x - radius < 0) 0 else x - radius
-    val xMax = if (x + radius > src.width) src.width else x + radius
+    val xMax = if (x + radius >= src.width) src.width - 1 else x + radius
     val yMin = if (y - radius < 0) 0 else y - radius
-    val yMax = if (y + radius > src.height) src.height else y + radius
+    val yMax = if (y + radius >= src.height) src.height - 1 else y + radius
 
     var xIndex = xMin
     var yIndex = yMin
@@ -69,9 +69,9 @@ package object scalashop {
       yIndex = yIndex + 1
     }
 
-    def f(x: Int): Int = clamp(x / counter, 0, 255)
+    def f(x: Int): Int = clamp( x / counter, 0, 255)
 
-    if(counter == 0) src(x, y)
+    if (counter == 0) src(x, y)
     else rgba(f(r), f(g), f(b), f(a))
   }
 
