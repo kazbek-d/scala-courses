@@ -66,13 +66,11 @@ package object scalashop {
 
     while (yIndex <= yMax) {
       while (xIndex <= xMax) {
-        if (xIndex != x || yIndex != y) {
-          counter = counter + 1
-          r = r + red(src(xIndex, yIndex))
-          g = g + green(src(xIndex, yIndex))
-          b = b + blue(src(xIndex, yIndex))
-          a = a + alpha(src(xIndex, yIndex))
-        }
+        counter = counter + 1
+        r = r + red(src(xIndex, yIndex))
+        g = g + green(src(xIndex, yIndex))
+        b = b + blue(src(xIndex, yIndex))
+        a = a + alpha(src(xIndex, yIndex))
         xIndex = xIndex + 1
       }
       xIndex = xMin
