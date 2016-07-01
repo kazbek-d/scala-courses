@@ -54,6 +54,16 @@ package object scalashop {
     var b: Int = 0
     var a: Int = 0
 
+    //    for (xIndex <- xMin to xMax) {
+    //      for (yIndex <- yMin to yMax if xIndex != x || yIndex != y) {
+    //        counter = counter + 1
+    //        r = r + red(src(xIndex, yIndex))
+    //        g = g + green(src(xIndex, yIndex))
+    //        b = b + blue(src(xIndex, yIndex))
+    //        a = a + alpha(src(xIndex, yIndex))
+    //      }
+    //    }
+
     while (yIndex <= yMax) {
       while (xIndex <= xMax) {
         if (xIndex != x || yIndex != y) {
@@ -69,7 +79,7 @@ package object scalashop {
       yIndex = yIndex + 1
     }
 
-    def f(x: Int): Int = clamp( x / counter, 0, 255)
+    def f(x: Int): Int = clamp(x / counter, 0, 255)
 
     if (counter == 0) src(x, y)
     else rgba(f(r), f(g), f(b), f(a))

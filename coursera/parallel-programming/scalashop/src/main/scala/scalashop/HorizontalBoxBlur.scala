@@ -42,22 +42,28 @@ object HorizontalBoxBlur {
    *  Within each row, `blur` traverses the pixels by going from left to right.
    */
   def blur(src: Img, dst: Img, from: Int, end: Int, radius: Int): Unit = {
-    val xMin = 0
-    val xMax = src.width
-    val yMin = from
-    val yMax = end
-
-    var x = xMin
-    var y = yMin
-
-    while (y < yMax) {
-      while (x < xMax) {
-        dst.update(x,y, boxBlurKernel(src, x, y, radius))
-        x = x + 1
+    for (x <- 0 until src.width) {
+      for (y <- math.max(from, 0) until math.min(end, src.height)) {
+        dst.update(x, y, boxBlurKernel(src, x, y, radius))
       }
-      x = xMin
-      y = y + 1
     }
+
+    //        val xMin = 0
+    //        val xMax = src.width
+    //        val yMin = math.max(from, 0)
+    //        val yMax = math.min(end, src.height)
+    //
+    //        var x = xMin
+    //        var y = yMin
+    //
+    //        while (y < yMax) {
+    //          while (x < xMax) {
+    //            dst.update(x, y, boxBlurKernel(src, x, y, radius))
+    //            x = x + 1
+    //          }
+    //          x = xMin
+    //          y = y + 1
+    //        }
   }
 
   /** Blurs the rows of the source image in parallel using `numTasks` tasks.
@@ -67,9 +73,14 @@ object HorizontalBoxBlur {
    *  rows.
    */
   def parBlur(src: Img, dst: Img, numTasks: Int, radius: Int): Unit = {
-  // TODO implement using the `task` construct and the `blur` method
-
-  ???
+    val numRows = src.height
+    val step = math.max(1, numRows / numTasks)
+    val starts = ( 0 until numRows by step ) :+ numRows
+    val chunks = starts.zip(starts.tail)
+    val tasks = for( (from,end) <- chunks ) yield task {
+        blur(src, dst, from, end, radius)
+      }
+    tasks.foreach(_.join)
   }
 
 }
