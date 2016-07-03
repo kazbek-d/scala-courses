@@ -16,15 +16,18 @@ object Start extends App with CookTaskOptimizer with Utils {
   println("Calculating minimum average waiting time for:")
   customersOrderList.foreach(println)
 
-  val result = process(customersOrderList)
+  val result = calculate(customersOrderList)
   println()
-  println("Solution:")
-  result.solution.foreach(println)
+  println("Log:")
+  result.log.foreach(println)
   println()
   println("Result:")
   println(result)
 
 }
+
+
+
 
 trait Utils {
   def loadLine = StdIn.readLine.split(" ") map (x => Try(x.toInt).toOption) filter (_.isDefined) map (_.get)

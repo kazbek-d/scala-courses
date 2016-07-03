@@ -12,11 +12,19 @@ class CustomersPizzaTest extends FunSuite with CookTaskOptimizer {
   )
 
   test("Minimum Average Waiting Time -> minLatency") {
-    assert(process(customersOrderList).minLatency === 9)
+    assert(calculate(customersOrderList).minLatency === 9)
   }
 
   test("Minimum Average Waiting Time -> customersOrder") {
-    assert(process(customersOrderList).customersOrder === List(1, 3, 2))
+    assert(calculate(customersOrderList).customersOrder === List(1, 3, 2))
+  }
+
+  test("Minimum Average Waiting Time -> minLatency Test 2") {
+    assert(calculate(List(
+      CustomersPizza(1, 0, 3),
+      CustomersPizza(2, 1, 9),
+      CustomersPizza(3, 2, 5)
+    )).minLatency === 8)
   }
 
 }
