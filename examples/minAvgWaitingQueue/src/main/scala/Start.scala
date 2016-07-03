@@ -1,40 +1,50 @@
 
 
-import QueuePackage.CustomersPizza
+import QueuePackage.{CookTaskOptimizer, CustomersPizza}
 
 import scala.io.StdIn
 import scala.util.Try
 
-object Start {
-  def main(args: Array[String]) {
+object Start extends App with CookTaskOptimizer with Utils {
 
-    def loadLine = StdIn.readLine.split(" ") map (x => Try(x.toInt).toOption) filter (_.isDefined) map (_.get)
+  println("Enter customers count: ")
+  val customersOrderList: List[CustomersPizza] =
+    (for (index <- 1 to loadCount)
+      yield { loadCustomersOrder(index) } ).toList
 
-    println("Enter customers count: ")
+  println()
+  println("Calculating minimum average waiting time for:")
+  customersOrderList.foreach(println)
+
+  val result = process(customersOrderList)
+  println()
+  println("Solution:")
+  result.solution.foreach(println)
+  println()
+  println("Result:")
+  println(result)
+
+}
+
+trait Utils {
+  def loadLine = StdIn.readLine.split(" ") map (x => Try(x.toInt).toOption) filter (_.isDefined) map (_.get)
+
+  def loadCount : Int = {
     val count = loadLine
-
-    val customersOrderList: List[CustomersPizza] =
-      (for (i <- 1 to ( if(count.length == 0) 0 else count(0)))
-        yield {
-          @annotation.tailrec
-          def loadCustomersOrder(acc: Set[Int]): CustomersPizza = {
-            println(s"Enter task $i. ( Format is 'CustomerNumber WaitingTime'. Example: '1 6' )")
-            try {
-              val line = loadLine
-              CustomersPizza(i, line(0), line(1))
-            } catch {
-              case e: Exception => {
-                println("Input string wrong format. Try again")
-                loadCustomersOrder(acc)
-              }
-            }
-          }
-          loadCustomersOrder(Set.empty)
-        }).toList
-
-    println("Calculating minimum average latency for:")
-    customersOrderList.map(x => s"Customer's Id: ${x.id}, waiting time: ${x.ti}, pizza preparing time: ${x.li} ").foreach(println)
-    println("Result:")
-
+    if (count.length == 0) 0 else count(0)
   }
+
+  def loadCustomersOrder(index: Int): CustomersPizza = {
+    println(s"Enter task $index. ( Format is 'CustomerNumber WaitingTime'. Example: '1 6' )")
+    try {
+      val line = loadLine
+      CustomersPizza(index, line(0), line(1))
+    } catch {
+      case e: Exception => {
+        println("Input string wrong format. Try again")
+        loadCustomersOrder(index)
+      }
+    }
+  }
+
 }
