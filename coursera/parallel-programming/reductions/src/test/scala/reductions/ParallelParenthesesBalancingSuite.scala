@@ -65,6 +65,14 @@ class ParallelParenthesesBalancingSuite extends FunSuite {
     check(".", true)
   }
 
+  test("balance should work for string of length 2 parBalance () t 1") {
+    def check(input: String, expected: Boolean) =
+      assert(parBalance(input.toArray, 1) === expected,
+        s"balance($input) should be $expected")
+
+    check("()", true)
+  }
+
   test("balance should work for string of length 2 parBalance") {
     def check(input: String, expected: Boolean) =
       assert(parBalance(input.toArray, input.toArray.length * 2 / 3) == expected,
@@ -79,4 +87,27 @@ class ParallelParenthesesBalancingSuite extends FunSuite {
     check("(.", false)
     check(").", false)
   }
+
+  test("balance should work for empty string parBalance ()()()() threshold 1") {
+    def check(input: String, expected: Boolean) =
+      assert(parBalance(input.toArray, 1) == expected,
+        s"balance($input) should be $expected")
+
+//[Test Description] parBalance should invoke the parallel construct 7 times for string '()()()()' and threshold 1
+//[Observed Error] 0 did not equal 7 The number of parallel calls should be 7
+
+    check("()()()()", true)
+  }
+
+  test("balance should work for empty string parBalance (()) threshold 1") {
+    def check(input: String, expected: Boolean) =
+      assert(parBalance(input.toArray, 1) == expected,
+        s"balance($input) should be $expected")
+
+    //[Test Description] parBalance should invoke the parallel construct 7 times for string '()()()()' and threshold 1
+    //[Observed Error] 0 did not equal 7 The number of parallel calls should be 7
+
+    check("(())", true)
+  }
+
 }

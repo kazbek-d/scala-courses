@@ -75,7 +75,7 @@ object ParallelParenthesesBalancing {
 
     @annotation.tailrec
     def traverse(idx: Int, until: Int, acc: Int, index: Int) : BigInt = {
-      if (idx + index >= until) acc
+      if (idx + index >= until || idx + index >= chars.length) acc
       else {
         val ac: Int = if (chars(idx + index) == '(') acc + 1 else if (chars(idx + index) == ')') acc - 1 else acc
         if(idx == 0 && ac < 0) Int.MaxValue else traverse(idx, until, ac, index + 1)
@@ -84,11 +84,11 @@ object ParallelParenthesesBalancing {
 
     def reduce(from: Int, until: Int) : BigInt = {
       if(until - from == 0) 0
-      else if (until - from < threshold || threshold < 2)
+      else if (until - from <= threshold || threshold == 0)
         traverse(from, until, 0, 0)
       else {
-        val mid = (from + until) / 2
-        val (left, right) = parallel(reduce(from, mid), reduce(mid, from))
+        val mid = until + (from - until)/2
+        val (left, right) = parallel(reduce(from, mid), reduce(mid, until))
 
         if (left == Int.MaxValue || right == Int.MaxValue) Int.MaxValue
         else left + right
