@@ -65,7 +65,7 @@ class KMeans {
   }
 
   def update(classified: GenMap[Point, GenSeq[Point]], oldMeans: GenSeq[Point]): GenSeq[Point] =
-    oldMeans.par.map(old => findAverage(old, classified(old)))
+    oldMeans.map(old => findAverage(old, classified(old)))
 
   def converged(eta: Double)(oldMeans: GenSeq[Point], newMeans: GenSeq[Point]): Boolean = if(oldMeans.isEmpty) true
   else oldMeans.zip(newMeans).forall(pair => pair._1.squareDistance(pair._2) <= eta)
@@ -73,8 +73,8 @@ class KMeans {
   @tailrec
   final def kMeans(points: GenSeq[Point], means: GenSeq[Point], eta: Double): GenSeq[Point] = {
     val updated = update(classify(points, means), means)
-    if (converged(eta)(means, updated)) kMeans(points, updated, eta)
-    else means // your implementation need to be tail recursive
+    if (converged(eta)(means, updated)) updated
+    else kMeans(points, updated, eta) // your implementation need to be tail recursive
   }
 }
 
@@ -125,3 +125,7 @@ object KMeansRunner {
   }
 
 }
+
+//[Test Description] 'kMeans' should work for 'points' == GenSeq((0, 0, 1), (0,0, -1), (0,1,0), (0,10,0)) and 'oldMeans' == GenSeq((0, -1, 0), (0, 2, 0)) and 'eta' == 12.25
+//[Observed Error] Util.equalPointSeq(KM.kMeans(points, means, eta), expected) was false KMeans(Vector((0.0, 0.0, 1.0), (0.0, 0.0, -1.0), (0.0, 1.0, 0.0), (0.0, 10.0, 0.0)), means) should equal to Vector((0.0, 0.0, 0.0), (0.0, 5.5, 0.0))
+//[Lost Points] 4
