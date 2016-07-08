@@ -45,8 +45,12 @@ class KMeans {
   def classify(points: GenSeq[Point], means: GenSeq[Point]): GenMap[Point, GenSeq[Point]] =
     if(points.isEmpty && means.nonEmpty)
       means.map(x=> x -> GenSeq[Point]()).toMap
-    else
-      points.par.groupBy(p=> findClosest(p, means))
+    else if(means.isEmpty)
+      GenMap[Point, GenSeq[Point]]()
+    else {
+      val acc = points.groupBy(p => findClosest(p, means))
+      means.map(x => if (acc.isDefinedAt(x)) x -> acc(x) else x -> GenSeq[Point]()).toMap
+    }
 
   def findAverage(oldMean: Point, points: GenSeq[Point]): Point = if (points.length == 0) oldMean else {
     var x = 0.0
@@ -63,10 +67,8 @@ class KMeans {
   def update(classified: GenMap[Point, GenSeq[Point]], oldMeans: GenSeq[Point]): GenSeq[Point] =
     oldMeans.par.map(old => findAverage(old, classified(old)))
 
-  def converged(eta: Double)(oldMeans: GenSeq[Point], newMeans: GenSeq[Point]): Boolean = {
-    val len: Int = oldMeans.length
-    (0 until len).par.forall(index => oldMeans(index).squareDistance(newMeans(index)) <= eta)
-  }
+  def converged(eta: Double)(oldMeans: GenSeq[Point], newMeans: GenSeq[Point]): Boolean = if(oldMeans.isEmpty) true
+  else oldMeans.zip(newMeans).forall(pair => pair._1.squareDistance(pair._2) <= eta)
 
   @tailrec
   final def kMeans(points: GenSeq[Point], means: GenSeq[Point], eta: Double): GenSeq[Point] = {
@@ -102,7 +104,7 @@ object KMeansRunner {
   def main(args: Array[String]) {
     val kMeans = new KMeans()
 
-    val numPoints = 500000
+    val numPoints = 1000000
     val eta = 0.01
     val k = 32
     val points = kMeans.generatePoints(k, numPoints)
