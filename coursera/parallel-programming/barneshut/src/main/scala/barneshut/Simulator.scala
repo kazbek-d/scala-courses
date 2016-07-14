@@ -4,6 +4,7 @@ import java.awt._
 import java.awt.event._
 import javax.swing._
 import javax.swing.event._
+
 import scala.collection.parallel.TaskSupport
 import scala.collection.parallel.Combiner
 import scala.collection.parallel.mutable.ParHashSet
@@ -11,12 +12,18 @@ import common._
 
 class Simulator(val taskSupport: TaskSupport, val timeStats: TimeStatistics) {
 
-  def updateBoundaries(boundaries: Boundaries, body: Body): Boundaries = {
-    ???
+  def updateBoundaries(boundaries: Boundaries, body: Body): Boundaries = new Boundaries {
+    minX = if (minX < body.x) minX else body.x
+    maxX = if (maxX > body.x) maxX else body.x
+    minY = if (minY < body.y) minY else body.y
+    maxY = if (maxY > body.y) maxY else body.y
   }
 
-  def mergeBoundaries(a: Boundaries, b: Boundaries): Boundaries = {
-    ???
+  def mergeBoundaries(a: Boundaries, b: Boundaries): Boundaries = new Boundaries {
+    minX = math.min(a.minX, b.minX)
+    maxX = math.min(a.maxX, b.maxX)
+    minY = math.min(a.minY, b.minY)
+    maxY = math.min(a.maxY, b.maxY)
   }
 
   def computeBoundaries(bodies: Seq[Body]): Boundaries = timeStats.timed("boundaries") {
@@ -28,7 +35,7 @@ class Simulator(val taskSupport: TaskSupport, val timeStats: TimeStatistics) {
   def computeSectorMatrix(bodies: Seq[Body], boundaries: Boundaries): SectorMatrix = timeStats.timed("matrix") {
     val parBodies = bodies.par
     parBodies.tasksupport = taskSupport
-    ???
+    parBodies.aggregate(new SectorMatrix(boundaries, SECTOR_PRECISION))((s, b) => s += b, (a, b) => a.combine(b))
   }
 
   def computeQuad(sectorMatrix: SectorMatrix): Quad = timeStats.timed("quad") {
@@ -38,7 +45,7 @@ class Simulator(val taskSupport: TaskSupport, val timeStats: TimeStatistics) {
   def updateBodies(bodies: Seq[Body], quad: Quad): Seq[Body] = timeStats.timed("update") {
     val parBodies = bodies.par
     parBodies.tasksupport = taskSupport
-    ???
+    bodies.map(b => b.updated(quad))
   }
 
   def eliminateOutliers(bodies: Seq[Body], sectorMatrix: SectorMatrix, quad: Quad): Seq[Body] = timeStats.timed("eliminate") {

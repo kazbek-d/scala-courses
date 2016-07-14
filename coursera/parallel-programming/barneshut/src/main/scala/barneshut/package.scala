@@ -70,7 +70,9 @@ package object barneshut {
 
   case class Leaf(centerX: Float, centerY: Float, size: Float, bodies: Seq[Body])
   extends Quad {
-    val (mass, massX, massY) = (bodies.map(_.mass).sum, bodies.map(b => b.mass * b.x).sum / bodies.map(_.mass).sum, bodies.map(b => b.mass * b.y).sum / bodies.map(_.mass).sum)
+    val (mass, massX, massY) = (bodies.map(_.mass).sum,
+      bodies.map(b => b.mass * b.x).sum / bodies.map(_.mass).sum,
+      bodies.map(b => b.mass * b.y).sum / bodies.map(_.mass).sum)
     val total: Int = bodies.length
 
     def insert(b: Body): Quad = if (centerX - b.x > size / 2 || centerY - b.y > size / 2) this
@@ -171,15 +173,10 @@ package object barneshut {
     for (i <- 0 until matrix.length) matrix(i) = new ConcBuffer
 
     def +=(b: Body): SectorMatrix = {
-      val x = (b.x / sectorSize).toInt + (if( b.x % sectorSize == 0) 0 else 1)
-      val y = (b.y / sectorSize).toInt + (if( b.y % sectorSize == 0) 0 else 1)
-
-      if(boundaries.minX > b.x || boundaries.maxX < b.x || boundaries.minY > b.y || boundaries.maxY < b.y) {
-
-      }
-      else
-        matrix(sectorPrecision * y + x) += b
-
+      val x = math.min(boundaries.maxX, math.max(boundaries.minX, b.x / sectorSize)).toInt
+      val y = math.min(boundaries.maxY, math.max(boundaries.minY, b.y / sectorSize)).toInt
+      val index = math.min(sectorPrecision * y + x, matrix.length - 1)
+      matrix(index) += b
       this
     }
 
