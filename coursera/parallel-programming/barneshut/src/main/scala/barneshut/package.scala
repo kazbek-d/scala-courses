@@ -178,7 +178,9 @@ package object barneshut {
     def apply(x: Int, y: Int) = matrix(y * sectorPrecision + x)
 
     def combine(that: SectorMatrix): SectorMatrix = {
-      matrix.indices.foreach(index => matrix(index) combine that.matrix(index))
+      matrix.indices.foreach(index => {
+        that.matrix(index).filter(b=> !matrix(index).exists(_ == b)).foreach(x=> matrix(index) += x )
+      })
       this
     }
 
