@@ -74,6 +74,15 @@ import FloatOps._
     }
   }
 
+    // Fork(Leaf(0.5,0.5,1.0,List(barneshut.package$Body@7714e963)),Leaf(1.5,0.5,1.0,List(barneshut.package$Body@7714e963)),Empty(0.5,1.5,1.0),Empty(1.5,1.5,1.0))
+    // Fork(Leaf(0.5,0.5,1.0,List(barneshut.package$Body@1dde4cb2)),Leaf(1.5,0.5,1.0,List(barneshut.package$Body@7714e963)),Empty(0.5,1.5,1.0),Empty(1.5,1.5,1.0))
+    //
+    // expected
+    // Fork(Leaf(0.5,0.5,1.0,List(barneshut.package$Body@1dde4cb2)),Leaf(1.5,0.5,1.0,List(barneshut.package$Body@7714e963)),Empty(0.5,1.5,1.0),Empty(1.5,1.5,1.0))
+    // found
+    // Fork(Leaf(0.5,0.5,1.0,List(barneshut.package$Body@7714e963)),Leaf(1.5,0.5,1.0,List(barneshut.package$Body@7714e963)),Empty(0.5,1.5,1.0),Empty(1.5,1.5,1.0))
+
+
   // test cases for Body
 
   test("Body.updated should do nothing for Empty quad trees") {
