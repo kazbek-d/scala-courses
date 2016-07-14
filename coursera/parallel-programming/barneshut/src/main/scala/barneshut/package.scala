@@ -167,10 +167,11 @@ package object barneshut {
     for (i <- 0 until matrix.length) matrix(i) = new ConcBuffer
 
     def +=(b: Body): SectorMatrix = {
-      val x = math.min(boundaries.maxX, math.max(boundaries.minX, b.x / sectorSize))
-      val y = math.min(boundaries.maxY, math.max(boundaries.minY, b.y / sectorSize))
-      val index = math.min(sectorPrecision * y.toInt + x.toInt, matrix.length - 1)
-      if(!matrix(index).exists(_ == b)) matrix(index) += b
+      val x = math.min(boundaries.maxX, math.max(boundaries.minX, b.x))
+      val y = math.min(boundaries.maxY, math.max(boundaries.minY, b.y))
+
+      val index = math.min(sectorPrecision * ((y - boundaries.minY) / sectorSize).toInt + ((x - boundaries.minX) / sectorSize).toInt, matrix.length - 1)
+      if (!matrix(index).exists(_ == b)) matrix(index) += b
       this
     }
 
