@@ -26,7 +26,8 @@ package object barneshut {
     def total: Int
     def insert(b: Body): Quad
     def isContainsBody(b: Body): Boolean =
-      math.abs(centerX - b.x) <= size / 2 && math.abs(centerY - b.y) <= size / 2
+      math.abs(centerX - b.x) < size && math.abs(centerY - b.y) < size
+      //b.x > centerX - size / 2 && b.x <= centerX + size / 2 && b.y > centerY - size / 2 && b.y <= centerY + size / 2
   }
 
   case class Empty(centerX: Float, centerY: Float, size: Float) extends Quad {
@@ -34,7 +35,7 @@ package object barneshut {
     def massY: Float = centerY
     def mass: Float = 0
     def total: Int = 0
-    def insert(b: Body): Quad = Leaf(centerX, centerY, size, Seq(b))
+    def insert(b: Body): Quad = if (this.isContainsBody(b)) Leaf(centerX, centerY, size, Seq(b)) else this
   }
 
   case class Fork(
@@ -48,21 +49,16 @@ package object barneshut {
     val massY: Float = if(mass == 0) centerY else (nw.mass * nw.massY + ne.mass * ne.massY + sw.mass * sw.massY + se.mass * se.massY) / mass
     val total: Int = nw.total + ne.total + sw.total + se.total
 
-    def insert(b: Body): Fork = {
-      val nwInserted = if(nw.isContainsBody(b)) nw.insert(b) else nw
-      val neInserted = if(ne.isContainsBody(b)) ne.insert(b) else ne
-      val swInserted = if(sw.isContainsBody(b)) sw.insert(b) else sw
-      val seInserted = if(se.isContainsBody(b)) se.insert(b) else se
-      Fork(nwInserted, neInserted, swInserted, seInserted)
-    }
+    def insert(b: Body): Fork =
+      Fork(nw.insert(b), ne.insert(b), sw.insert(b), se.insert(b))
   }
 
   case class Leaf(centerX: Float, centerY: Float, size: Float, bodies: Seq[Body])
   extends Quad {
     val m = bodies.map(_.mass).sum
     val (mass, massX, massY) = (m,
-      if(m == 0) centerX else bodies.map(b => b.mass * b.x).sum / m,
-      if(m == 0) centerY else bodies.map(b => b.mass * b.y).sum / m)
+      if (m == 0) centerX else bodies.map(b => b.mass * b.x).sum / m,
+      if (m == 0) centerY else bodies.map(b => b.mass * b.y).sum / m)
     val total: Int = bodies.length
 
     def insert(b: Body): Quad =
@@ -70,17 +66,12 @@ package object barneshut {
         val offset: Float = size / 4
         val sizeChild: Float = size / 2
 
-        val nw = Empty(centerX - offset, centerY - offset, sizeChild)
-        val ne = Empty(centerX + offset, centerY - offset, sizeChild)
-        val sw = Empty(centerX - offset, centerY + offset, sizeChild)
-        val se = Empty(centerX + offset, centerY + offset, sizeChild)
+        val nw = Empty(centerX - offset, centerY - offset, sizeChild).insert(b)
+        val ne = Empty(centerX + offset, centerY - offset, sizeChild).insert(b)
+        val sw = Empty(centerX - offset, centerY + offset, sizeChild).insert(b)
+        val se = Empty(centerX + offset, centerY + offset, sizeChild).insert(b)
 
-        Fork(
-          if (nw.isContainsBody(b)) nw.insert(b) else nw,
-          if (ne.isContainsBody(b)) ne.insert(b) else ne,
-          if (sw.isContainsBody(b)) sw.insert(b) else sw,
-          if (se.isContainsBody(b)) se.insert(b) else se
-        )
+        Fork(nw, ne, sw, se)
       } else Leaf(centerX, centerY, size, bodies :+ b)
   }
 
