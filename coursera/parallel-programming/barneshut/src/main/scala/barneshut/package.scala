@@ -1,5 +1,5 @@
 import common._
-import barneshut.conctrees._
+import barneshut.conctrees.{ConcBuffer, _}
 
 package object barneshut {
 
@@ -167,17 +167,17 @@ package object barneshut {
     for (i <- 0 until matrix.length) matrix(i) = new ConcBuffer
 
     def +=(b: Body): SectorMatrix = {
-      val x = math.min(boundaries.maxX, math.max(boundaries.minX, b.x / sectorSize)).toInt
-      val y = math.min(boundaries.maxY, math.max(boundaries.minY, b.y / sectorSize)).toInt
-      val index = math.min(sectorPrecision * y + x, matrix.length - 1)
-      matrix(index) += b
+      val x = math.min(boundaries.maxX, math.max(boundaries.minX, b.x / sectorSize))
+      val y = math.min(boundaries.maxY, math.max(boundaries.minY, b.y / sectorSize))
+      val index = math.min(sectorPrecision * y.toInt + x.toInt, matrix.length - 1)
+      if(!matrix(index).exists(_ == b)) matrix(index) += b
       this
     }
 
     def apply(x: Int, y: Int) = matrix(y * sectorPrecision + x)
 
     def combine(that: SectorMatrix): SectorMatrix = {
-      this.matrix.zip(that.matrix).foreach(pair => pair._2.foreach(b => pair._1 += b))
+      matrix.indices.foreach(index => matrix(index) combine that.matrix(index))
       this
     }
 
