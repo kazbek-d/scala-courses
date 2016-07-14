@@ -5,48 +5,28 @@ package object barneshut {
 
   class Boundaries {
     var minX = Float.MaxValue
-
     var minY = Float.MaxValue
-
     var maxX = Float.MinValue
-
     var maxY = Float.MinValue
-
     def width = maxX - minX
-
     def height = maxY - minY
-
     def size = math.max(width, height)
-
     def centerX = minX + width / 2
-
     def centerY = minY + height / 2
-
     override def toString = s"Boundaries($minX, $minY, $maxX, $maxY)"
   }
 
   sealed abstract class Quad {
     def massX: Float
-
     def massY: Float
-
     def mass: Float
-
     def centerX: Float
-
     def centerY: Float
-
     def size: Float
-
     def total: Int
-
     def insert(b: Body): Quad
-
     def isContainsBody(b: Body): Boolean =
-      centerX - size / 2 < b.x &&
-        centerX + size / 2 >= b.x &&
-        centerY - size / 2 < b.y &&
-        centerY + size / 2 >= b.y
+      math.abs(centerX - b.x) <= size / 2 && math.abs(centerY - b.y) <= size / 2
   }
 
   case class Empty(centerX: Float, centerY: Float, size: Float) extends Quad {
@@ -64,8 +44,8 @@ package object barneshut {
     val centerY: Float = nw.centerY + nw.size / 2
     val size: Float = nw.size * 2
     val mass: Float = nw.mass + ne.mass + sw.mass + se.mass
-    val massX: Float = (nw.mass * nw.massX + ne.mass * ne.massX + sw.mass * sw.massX + se.mass * se.massX) / mass
-    val massY: Float = (nw.mass * nw.massY + ne.mass * ne.massY + sw.mass * sw.massY + se.mass * se.massY) / mass
+    val massX: Float = if(mass == 0) centerX else (nw.mass * nw.massX + ne.mass * ne.massX + sw.mass * sw.massX + se.mass * se.massX) / mass
+    val massY: Float = if(mass == 0) centerY else (nw.mass * nw.massY + ne.mass * ne.massY + sw.mass * sw.massY + se.mass * se.massY) / mass
     val total: Int = nw.total + ne.total + sw.total + se.total
 
     def insert(b: Body): Fork = {
@@ -79,13 +59,14 @@ package object barneshut {
 
   case class Leaf(centerX: Float, centerY: Float, size: Float, bodies: Seq[Body])
   extends Quad {
-    val (mass, massX, massY) = (bodies.map(_.mass).sum,
-      bodies.map(b => b.mass * b.x).sum / bodies.map(_.mass).sum,
-      bodies.map(b => b.mass * b.y).sum / bodies.map(_.mass).sum)
+    val m = bodies.map(_.mass).sum
+    val (mass, massX, massY) = (m,
+      if(m == 0) centerX else bodies.map(b => b.mass * b.x).sum / m,
+      if(m == 0) centerY else bodies.map(b => b.mass * b.y).sum / m)
     val total: Int = bodies.length
 
     def insert(b: Body): Quad =
-      if (minimumSize < size) {
+      if (size > minimumSize) {
         val offset: Float = size / 4
         val sizeChild: Float = size / 2
 
