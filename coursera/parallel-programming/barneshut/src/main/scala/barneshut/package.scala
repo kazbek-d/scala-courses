@@ -25,9 +25,10 @@ package object barneshut {
     def size: Float
     def total: Int
     def insert(b: Body): Quad
+    def halhSize = size / 2
     def isContainsBody(b: Body): Boolean =
-      math.abs(centerX - b.x) < size && math.abs(centerY - b.y) < size
-      //b.x > centerX - size / 2 && b.x <= centerX + size / 2 && b.y > centerY - size / 2 && b.y <= centerY + size / 2
+      //math.abs(centerX - b.x) < size && math.abs(centerY - b.y) < size
+      b.x > centerX - halhSize && b.x <= centerX + halhSize && b.y > centerY - halhSize && b.y <= centerY + halhSize
   }
 
   case class Empty(centerX: Float, centerY: Float, size: Float) extends Quad {
@@ -35,7 +36,7 @@ package object barneshut {
     def massY: Float = centerY
     def mass: Float = 0
     def total: Int = 0
-    def insert(b: Body): Quad = if (this.isContainsBody(b)) Leaf(centerX, centerY, size, Seq(b)) else this
+    def insert(b: Body): Quad = Leaf(centerX, centerY, size, Seq(b))
   }
 
   case class Fork(
@@ -50,7 +51,12 @@ package object barneshut {
     val total: Int = nw.total + ne.total + sw.total + se.total
 
     def insert(b: Body): Fork =
-      Fork(nw.insert(b), ne.insert(b), sw.insert(b), se.insert(b))
+      Fork(
+          if(nw.isContainsBody(b)) nw.insert(b) else nw,
+          if(ne.isContainsBody(b)) ne.insert(b) else ne,
+          if(sw.isContainsBody(b)) sw.insert(b) else sw,
+          if(se.isContainsBody(b)) se.insert(b) else se
+    )
   }
 
   case class Leaf(centerX: Float, centerY: Float, size: Float, bodies: Seq[Body])
@@ -63,16 +69,23 @@ package object barneshut {
 
     def insert(b: Body): Quad =
       if (size > minimumSize) {
+
         val offset: Float = size / 4
         val sizeChild: Float = size / 2
 
-        val nw = Empty(centerX - offset, centerY - offset, sizeChild).insert(b)
-        val ne = Empty(centerX + offset, centerY - offset, sizeChild).insert(b)
-        val sw = Empty(centerX - offset, centerY + offset, sizeChild).insert(b)
-        val se = Empty(centerX + offset, centerY + offset, sizeChild).insert(b)
+        bodies.foldLeft(Fork(
+          Empty(centerX - offset, centerY - offset, sizeChild),
+          Empty(centerX + offset, centerY - offset, sizeChild),
+          Empty(centerX - offset, centerY + offset, sizeChild),
+          Empty(centerX + offset, centerY + offset, sizeChild))) {
+          (fork, body) => fork.insert(body)
+        }.insert(b)
 
-        Fork(nw, ne, sw, se)
       } else Leaf(centerX, centerY, size, bodies :+ b)
+
+    override def toString = {
+      s"Leaf($centerX, $centerY, $size, $mass, $massX, $massY, bodies[" + bodies.mkString("/") + "])"
+    }
   }
 
   def minimumSize = 0.00001f
@@ -92,6 +105,11 @@ package object barneshut {
   }
 
   class Body(val mass: Float, val x: Float, val y: Float, val xspeed: Float, val yspeed: Float) {
+
+    override def toString = {
+      s"Body($mass, $x, $y, $xspeed, $yspeed)"
+    }
+
 
     def updated(quad: Quad): Body = {
       var netforcex = 0.0f
@@ -124,6 +142,7 @@ package object barneshut {
         // no force
         case Leaf(_, _, _, bodies) =>
           // add force contribution of each body by calling addForce
+          //bodies.foreach(b => addForce(b.mass, quad.massX, quad.massY))
           bodies.foreach(b => addForce(b.mass, b.x, b.y))
         case Fork(nw, ne, sw, se) =>
           // see if node is far enough from the body,
