@@ -10,29 +10,28 @@ class Account extends Actor with ActorLogging {
 
   def receive: Receive = {
 
-    case AccGetBalance =>{
+    case GetBalance(acc) => {
       log.info(s"AccGetBalance comes.")
-      sender ! balance
+      sender ! Balance(acc, balance)
     }
 
-    case AccDeposit(amount) => {
+    case Deposit(acc, amount) => {
       log.info(s"Deposit ($amount)")
       balance += amount
-      sender ! OK
+      sender ! Balance(acc, balance)
     }
 
-    case AccWithdraw(amount) => {
+    case Withdraw(acc, amount) => {
       log.info(s"Withdraw ($amount)")
       sender ! {
-        if(balance < amount) InsufficientFunds(s"($balance < $amount")
+        if(balance < amount)
+          sender ! InsufficientFunds(s"InsufficientFunds ($balance < $amount)")
         else {
           balance -= amount
-          OK
+          sender ! Balance(acc, balance)
         }
       }
     }
-
-
 
   }
 }
