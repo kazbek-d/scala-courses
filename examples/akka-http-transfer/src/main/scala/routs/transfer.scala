@@ -26,7 +26,7 @@ object transfer {
   implicit val anyErrFormat = jsonFormat1(m.AnyErr)
   implicit val insufficientFunds = jsonFormat1(m.InsufficientFunds)
 
-  import common.implicits._
+  import common.helper._
   implicit val timeout: Timeout = 5.seconds
 
   private val makeResult: (Try[Any]) => StandardRoute = {
@@ -38,17 +38,6 @@ object transfer {
       case _ => complete(StatusCodes.Accepted, "Ok")
     }
     case Failure(ex) => complete(StatusCodes.InternalServerError, s"An error occurred: ${ex.getMessage}")
-  }
-
-  private val accMap = new ConcurrentHashMap[String, ActorRef]
-  private def account(acc: String) : ActorRef = {
-    val child = accMap.get(acc)
-    if (child == null) {
-      val actor: ActorRef = system.actorOf(Props[Account], name = acc)
-      accMap.put(acc, actor)
-      actor
-    }
-    else child
   }
 
   val transferRoute = pathPrefix("transfer") {

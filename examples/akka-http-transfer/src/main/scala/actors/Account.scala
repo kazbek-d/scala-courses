@@ -33,5 +33,19 @@ class Account extends Actor with ActorLogging {
       }
     }
 
+    case Transfer2Acc(acc1, acc2, amount) => {
+      log.info(s"Transfer2Acc ($acc1, $acc2, $amount)")
+      import common.helper._
+      sender ! {
+        if(balance < amount)
+          sender ! InsufficientFunds(s"InsufficientFunds ($balance < $amount)")
+        else {
+          balance -= amount
+          account(acc2) ! Deposit(acc2, amount)
+          sender ! Balance(acc1, balance)
+        }
+      }
+    }
+
   }
 }
