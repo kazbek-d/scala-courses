@@ -5,7 +5,6 @@ import java.util.concurrent.ConcurrentHashMap
 import actors.Account
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.stream.ActorMaterializer
-import model.Transfer
 import spray.json.DefaultJsonProtocol._
 
 

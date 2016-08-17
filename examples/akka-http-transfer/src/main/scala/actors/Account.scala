@@ -33,6 +33,7 @@ class Account extends Actor with ActorLogging {
       }
     }
 
+    //TODO: use hold
     case Transfer2Acc(acc1, acc2, amount) => {
       log.info(s"Transfer2Acc ($acc1, $acc2, $amount)")
       import common.helper._

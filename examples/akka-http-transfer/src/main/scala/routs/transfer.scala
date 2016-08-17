@@ -7,7 +7,6 @@ import akka.http.scaladsl.server.StandardRoute
 import akka.pattern.ask
 import akka.util.Timeout
 import model.{Transfer => m}
-import spray.json.DefaultJsonProtocol._
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
