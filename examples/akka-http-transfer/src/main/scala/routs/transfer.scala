@@ -1,9 +1,5 @@
 package routs
 
-import java.util.concurrent.ConcurrentHashMap
-
-import actors.Account
-import akka.actor.{ActorRef, Props}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
@@ -18,15 +14,8 @@ import scala.util.{Failure, Success, Try}
 
 object transfer {
 
-  implicit val transfer2AccFormat = jsonFormat3(m.Transfer2Acc)
-  implicit val balanceFormat = jsonFormat2(m.Balance)
-  implicit val depositFormat = jsonFormat2(m.Deposit)
-  implicit val withdrawFormat = jsonFormat2(m.Withdraw)
-  implicit val getBalanceFormat = jsonFormat1(m.GetBalance)
-  implicit val anyErrFormat = jsonFormat1(m.AnyErr)
-  implicit val insufficientFunds = jsonFormat1(m.InsufficientFunds)
-
   import common.helper._
+  import common.model_implicits._
   implicit val timeout: Timeout = 5.seconds
 
   private val makeResult: (Try[Any]) => StandardRoute = {

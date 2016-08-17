@@ -1,12 +1,11 @@
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.Http.ServerBinding
 
+import scala.concurrent.Future
 import scala.io.StdIn
 
 
-object WebServer extends App {
-
-  println("Server Start 127.0.0.1:8081")
+trait Server {
 
   val route = {
     import routs._
@@ -15,12 +14,23 @@ object WebServer extends App {
 
   import common.implicits._
 
-  val bindingFuture = Http().bindAndHandle(route, "localhost", 8081)
+  private var bindingFuture: Future[ServerBinding] = null
 
+  def bind(ip:String = "localhost", port : Int = 8081) =
+    bindingFuture = Http().bindAndHandle(route, ip, port)
+
+  def unbind =
+    bindingFuture.flatMap(_.unbind()).onComplete(_ => system.terminate())
+
+}
+
+object WebServer extends App with Server {
+
+  println("Server Start 127.0.0.1:8081")
+  bind()
   println("press any key for exit")
   StdIn.readLine()
-  bindingFuture.flatMap(_.unbind()).onComplete(_ => system.terminate())
-
+  unbind
   println("Server End")
 
 }
