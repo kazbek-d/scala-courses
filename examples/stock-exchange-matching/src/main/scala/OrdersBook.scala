@@ -51,7 +51,7 @@ trait OrdersBook extends BinomialHeap {
       }
       case _ => acc
     }
-    loop(canStartBuyAndSale, Nil)
+    loop(canStartBuyAndSale, Nil).reverse
   }
 
   def insertOrder(order: Order): List[MatchingOrders] = {

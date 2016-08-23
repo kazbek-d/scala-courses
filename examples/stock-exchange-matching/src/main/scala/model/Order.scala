@@ -22,4 +22,6 @@ case class Order(clientName: String, operation: Operation, asset: Asset, price: 
   override def toString: String = {
     s"$clientName, $operation, $asset, $price, $quantity"
   }
+
+  def orderPrice = price * quantity
 }
