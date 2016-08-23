@@ -1,14 +1,5 @@
 package common
 
-import model.Order
-
-
-trait OrdersHeap extends BinomialHeap {
-  override type A = Order
-  override def ord = Ordering.by(_.price)
-}
-
-
 trait Heap {
   type H // type of a heap
   type A // type of an element
