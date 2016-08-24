@@ -2,13 +2,15 @@ package common
 
 import java.util.concurrent.ConcurrentHashMap
 
-import actors.Ticker
+import actors.{Ticker, UpdateClients}
 import akka.actor.{ActorRef, ActorSystem, Props}
 
 
 object helper {
 
   val system = ActorSystem("mySystem")
+
+  val updateClients: ActorRef = system.actorOf(Props[UpdateClients], name = "UpdateClients")
 
   // TODO: use actorSelection
   private val accMap = new ConcurrentHashMap[String, ActorRef]

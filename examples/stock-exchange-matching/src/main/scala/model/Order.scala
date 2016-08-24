@@ -10,6 +10,8 @@ case object Sale extends Operation {
   override def toString: String = "Sale"
 }
 
+case class SetMatchingOrders(xs: List[MatchingOrders])
+
 case class MatchingOrders(buy: Order, sale: Order) {
   override def toString: String = s"Buy: $buy, Sale: $sale"
 }
