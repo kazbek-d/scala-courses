@@ -16,8 +16,8 @@ trait OrdersBook extends BinomialHeap {
   else {
     val b = findMin(buy)
     val s = findMin(sale)
-    if (b.price <= -s.price)
-      Some(MatchingOrders(b, s))
+    if (-b.price >= s.price)
+      Some(MatchingOrders(b.copy(price = -b.price), s))
     else
       None
   }
@@ -56,8 +56,8 @@ trait OrdersBook extends BinomialHeap {
 
   def insertOrder(order: Order): List[MatchingOrders] = {
     order.operation match {
-      case Buy => buy = insert(order, buy)
-      case Sale => sale = insert(order.copy(price = -order.price), sale)
+      case Buy => buy = insert(order.copy(price = -order.price), buy)
+      case Sale => sale = insert(order, sale)
     }
     matching
   }

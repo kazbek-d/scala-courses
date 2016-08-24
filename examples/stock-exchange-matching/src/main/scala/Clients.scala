@@ -21,7 +21,7 @@ trait Clients {
       val a = if (order.asset.name.equals("A")) client.a + order.quantity * sign else client.a
       val b = if (order.asset.name.equals("B")) client.b + order.quantity * sign else client.b
       val c = if (order.asset.name.equals("C")) client.c + order.quantity * sign else client.c
-      val d = if (order.asset.name.equals("D")) client.b + order.quantity * sign else client.d
+      val d = if (order.asset.name.equals("D")) client.d + order.quantity * sign else client.d
       clients.replace(order.clientName, client, client.copy(cash = cash, a = a, b = b, c = c, d = d))
     }
   }
