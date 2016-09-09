@@ -7,18 +7,15 @@ object MostPopularSuperhero extends App {
 
   // Function to extract the hero ID and number of connections from each line
   def countCoOccurences(line: String) = {
-    var elements = line.split("\\s+")
+    val elements = line.split("\\s+")
     (elements(0).toInt, elements.length - 1)
   }
 
   // Function to extract hero ID -> hero name tuples (or None in case of failure)
   def parseNames(line: String): Option[(Int, String)] = {
-    var fields = line.split('\"')
-    if (fields.length > 1) {
-      return Some(fields(0).trim().toInt, fields(1))
-    } else {
-      return None // flatmap will just discard None results, and extract data from Some results.
-    }
+    val fields = line.split('\"')
+    if (fields.length > 1) Some(fields(0).trim().toInt, fields(1))
+    else None // flatmap will just discard None results, and extract data from Some results.
   }
 
 
