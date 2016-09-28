@@ -8,29 +8,31 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.StandardRoute
 import akka.pattern.ask
 import akka.util.Timeout
-import data.DefaultRepository
+import data.Repository
+import model.Sales.SalesResponces
 import model.{Sales => m}
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
-object sales {
+class SalesRout(implicit repository: Repository) {
 
-  import common.model_implicits._
   import common.implicits._
+  import common.model_implicits._
 
   implicit val timeout: Timeout = 5.seconds
 
   private val makeResult: (Try[Any]) => StandardRoute = {
     case Success(value) => value match {
       case err: m.AnyErr => complete(StatusCodes.BadRequest, err)
-      case salesData: m.SalesData => complete(StatusCodes.Accepted, salesData)
+      case salesData : SalesResponces =>
+        complete(StatusCodes.Accepted, salesData)
       case _ => complete(StatusCodes.Accepted, "Ok")
     }
     case Failure(ex) => complete(StatusCodes.InternalServerError, s"An error occurred: ${ex.getMessage}")
   }
 
-  val salesDataActor = system.actorOf(Props(new SalesDataActor(new DefaultRepository)), "salesDataActor")
+  val salesDataActor = system.actorOf(Props(new SalesDataActor), "salesDataActor")
 
   val salesRoute = pathPrefix("test") {
 

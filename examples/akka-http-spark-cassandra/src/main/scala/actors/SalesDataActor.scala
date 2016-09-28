@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorLogging}
 import data.Repository
 import model.Sales._
 
-class SalesDataActor(repository: Repository) extends Actor with ActorLogging {
+class SalesDataActor(implicit repository: Repository) extends Actor with ActorLogging {
 
   def receive: Receive = {
 

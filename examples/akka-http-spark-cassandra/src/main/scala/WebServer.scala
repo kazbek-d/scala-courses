@@ -1,14 +1,17 @@
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
+import data.Repository
+import data.DefaultRepository
+import routs.SalesRout
 
 import scala.concurrent.Future
 import scala.io.StdIn
 
 
-trait Server {
+class Server(implicit repository: Repository) {
 
+  val sales = new SalesRout()
   val route = {
-    import routs._
     sales.salesRoute
   }
 
@@ -21,16 +24,18 @@ trait Server {
 
   def unbind =
     bindingFuture.flatMap(_.unbind()).onComplete(_ => system.terminate())
-
 }
 
-object WebServer extends App with Server {
+object WebServer extends App  {
+
+  implicit val repository = new DefaultRepository
+  val server = new Server()
 
   println("Server Start 127.0.0.1:8081")
-  bind()
+  server.bind()
   println("press any key for exit")
   StdIn.readLine()
-  unbind
+  server.unbind
   println("Server End")
 
 }

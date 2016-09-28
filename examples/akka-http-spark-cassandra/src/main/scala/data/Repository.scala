@@ -3,8 +3,8 @@ package data
 import model.Sales._
 
 trait Repository {
-  def getSalesByPeriod(condition: SalesByPeriod) : List[SalesData]
-  def getSalesByShop(condition: SalesByShop) : List[SalesData]
-  def getSalesByShopProduct(condition: SalesByShopProduct) : List[SalesData]
-  def getSalesByShopPrice(condition: SalesByShopPrice) : List[SalesData]
+  def getSalesByPeriod(condition: SalesByPeriod) : SalesResponces
+  def getSalesByShop(condition: SalesByShop) : SalesResponces
+  def getSalesByShopProduct(condition: SalesByShopProduct) : SalesResponces
+  def getSalesByShopPrice(condition: SalesByShopPrice) : SalesResponces
 }
