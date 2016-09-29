@@ -52,7 +52,7 @@ object model_implicits {
   implicit val salesByShopProductFormat = jsonFormat4(m.SalesByShopProduct)
   implicit val salesByShopPriceFormat = jsonFormat5(m.SalesByShopPrice)
   implicit val anyErrFormat = jsonFormat1(m.AnyErr)
-  implicit val salesDataFormat = jsonFormat7(m.SalesData)
+  implicit val salesDataFormat = jsonFormat8(m.SalesData)
   implicit val salesDataListFormat = jsonFormat1(m.SalesResponces)
 }
 
