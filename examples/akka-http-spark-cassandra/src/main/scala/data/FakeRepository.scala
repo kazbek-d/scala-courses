@@ -5,12 +5,12 @@ import model.Sales._
 class FakeRepository extends Repository {
   override def getSalesByPeriod(condition: SalesByPeriod) =
     SalesResponces {
-      List(SalesData("pk", 1, condition.from, 2, 3, 100.500, 4, 5))
+      List(SalesData(1, condition.from, 2, 3, 100.500, 4, 5))
     }
 
   override def getSalesByShop(condition: SalesByShop) =
     SalesResponces {
-      condition.shop.map(shop => SalesData("pk", shop, condition.from, 2, 3, 100.500, 4, 5))
+      condition.shop.map(shop => SalesData(shop, condition.from, 2, 3, 100.500, 4, 5))
     }
 
   override def getSalesByShopProduct(condition: SalesByShopProduct) =
@@ -19,12 +19,12 @@ class FakeRepository extends Repository {
         shop <- condition.shop
         product_id <- condition.products
       } yield {
-        SalesData("pk", shop, condition.from, product_id, 3, 100.500, 4, 5)
+        SalesData(shop, condition.from, product_id, 3, 100.500, 4, 5)
       }
     }
 
   override def getSalesByShopPrice(condition: SalesByShopPrice) =
     SalesResponces {
-      condition.shop.map(shop => SalesData("pk", shop, condition.from, 2, 3, condition.price_from + condition.price_to, 4, 5))
+      condition.shop.map(shop => SalesData(shop, condition.from, 2, 3, condition.price_from + condition.price_to, 4, 5))
     }
 }

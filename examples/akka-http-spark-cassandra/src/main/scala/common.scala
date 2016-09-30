@@ -1,12 +1,10 @@
 package common
 
-import java.time.{ZoneId, ZonedDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{ZoneId, ZonedDateTime}
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import org.joda.time.DateTimeZone
-import org.joda.time.format.ISODateTimeFormat
 import spray.json.DefaultJsonProtocol._
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, RootJsonFormat}
 
@@ -52,7 +50,7 @@ object model_implicits {
   implicit val salesByShopProductFormat = jsonFormat4(m.SalesByShopProduct)
   implicit val salesByShopPriceFormat = jsonFormat5(m.SalesByShopPrice)
   implicit val anyErrFormat = jsonFormat1(m.AnyErr)
-  implicit val salesDataFormat = jsonFormat8(m.SalesData)
+  implicit val salesDataFormat = jsonFormat7(m.SalesData)
   implicit val salesDataListFormat = jsonFormat1(m.SalesResponces)
 }
 

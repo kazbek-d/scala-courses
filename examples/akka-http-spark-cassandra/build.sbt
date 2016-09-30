@@ -14,5 +14,5 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.6" % "test",
   "com.m3" %% "curly-scala" % "0.5.+",
   "com.datastax.spark" %% "spark-cassandra-connector" % "2.0.0-M3",
-  "org.apache.spark" %% "spark-core" % "2.0.0"
+  "com.sparklinedata" % "spark-datetime_2.10" % "0.0.2"
 )

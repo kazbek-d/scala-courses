@@ -2,10 +2,13 @@ package model
 
 import java.time.ZonedDateTime
 
+import com.github.nscala_time.time.Imports._
+
 
 object Sales {
 
-  case class SalesData(surrogate_pk: String, shop_id: Int, sale_date: ZonedDateTime, product_id: Int, product_count: Int, price: BigDecimal, category_id: Int, vendor_id: Int)
+  case class SalesData(shop_id: Int, sale_date: ZonedDateTime, product_id: Int, product_count: Int, price: BigDecimal, category_id: Int, vendor_id: Int)
+  case class SalesDataSQL(surrogate_pk: String, shop_id: Int, sale_date: DateTime, product_id: Int, product_count: Int, price: BigDecimal, category_id: Int, vendor_id: Int)
 
   trait Requests
   case class SalesByPeriod(from: ZonedDateTime, to: ZonedDateTime) extends Requests
