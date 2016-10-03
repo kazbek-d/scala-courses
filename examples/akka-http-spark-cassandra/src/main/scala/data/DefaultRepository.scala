@@ -11,6 +11,9 @@ import org.apache.spark.{SparkConf, SparkContext}
 // Docker:
 // https://hub.docker.com/_/cassandra/
 
+// Spark:
+// http://spark.apache.org/downloads.html
+
 class DefaultRepository extends Repository {
 
   import Utils.DateTimeUtils._
@@ -34,7 +37,41 @@ class DefaultRepository extends Repository {
       .map(_.toSalesData).toList
   }
 
-  override def getSalesByShop(condition: SalesByShop): SalesResponces = ???
-  override def getSalesByShopProduct(condition: SalesByShopProduct): SalesResponces = ???
-  override def getSalesByShopPrice(condition: SalesByShopPrice): SalesResponces = ???
+  override def getSalesByShop(condition: SalesByShop): SalesResponces = SalesResponces {
+    toSalesDataSQL(rdd)
+      .filter(row =>
+        toSurrogate_pk_s(condition.from, condition.to).contains(row.surrogate_pk) &&
+          row.sale_date.isAfter(condition.from.toDateTime) &&
+          row.sale_date.isBefore(condition.to.toDateTime) &&
+          condition.shop.contains(row.shop_id)
+      )
+      .collect()
+      .map(_.toSalesData).toList
+  }
+
+  override def getSalesByShopProduct(condition: SalesByShopProduct): SalesResponces = SalesResponces {
+    toSalesDataSQL(rdd)
+      .filter(row =>
+        toSurrogate_pk_s(condition.from, condition.to).contains(row.surrogate_pk) &&
+          row.sale_date.isAfter(condition.from.toDateTime) &&
+          row.sale_date.isBefore(condition.to.toDateTime) &&
+          condition.shop.contains(row.shop_id) &&
+          condition.products.contains(row.product_id)
+      )
+      .collect()
+      .map(_.toSalesData).toList
+  }
+
+  override def getSalesByShopPrice(condition: SalesByShopPrice): SalesResponces = SalesResponces {
+    toSalesDataSQL(rdd)
+      .filter(row =>
+        toSurrogate_pk_s(condition.from, condition.to).contains(row.surrogate_pk) &&
+          row.sale_date.isAfter(condition.from.toDateTime) &&
+          row.sale_date.isBefore(condition.to.toDateTime) &&
+          row.price >= condition.price_from &&
+          row.price <= condition.price_to
+      )
+      .collect()
+      .map(_.toSalesData).toList
+  }
 }
