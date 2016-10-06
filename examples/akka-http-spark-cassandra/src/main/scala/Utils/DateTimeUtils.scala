@@ -1,8 +1,7 @@
 package Utils
 
 import java.time.ZonedDateTime
-
-import com.github.nscala_time.time.Imports._
+import org.joda.time.{DateTime, DateTimeZone}
 
 object DateTimeUtils {
 
