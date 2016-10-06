@@ -1,10 +1,6 @@
 Docker (Cassandra image):
 https://hub.docker.com/_/cassandra/
 
-Spark:
-http://spark.apache.org/downloads.html
-
-
 Test Data:
  surrogate_pk | shop_id | sale_date                       | product_id | price  | category_id | product_count | vendor_id
 --------------+---------+---------------------------------+------------+--------+-------------+---------------+-----------
