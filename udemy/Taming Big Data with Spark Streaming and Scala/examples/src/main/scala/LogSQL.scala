@@ -1,14 +1,11 @@
 
-import org.apache.spark.SparkConf
-import org.apache.spark.streaming.{Seconds, StreamingContext, Time}
-import org.apache.spark.storage.StorageLevel
-import org.apache.spark.sql.{SQLContext, SparkSession}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.SparkContext
-import java.util.regex.Pattern
 import java.util.regex.Matcher
 
 import Utilities._
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.storage.StorageLevel
+import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 /** Illustrates using SparkSQL with Spark Streaming, to issue queries on 
  *  Apache log data extracted from a stream on port 9999.
@@ -49,7 +46,8 @@ object LogSQL extends App {
     // using SQL queries.
 
     // Get the singleton instance of SQLContext
-    val sqlContext = SQLContextSingleton.getInstance(rdd.sparkContext)
+//    val sqlContext = SQLContextSingleton.getInstance(rdd.sparkContext)
+    val sqlContext = SparkSession.builder().getOrCreate()
     import sqlContext.implicits._
 
     // SparkSQL can automatically create DataFrames from Scala "case classes".
@@ -84,19 +82,3 @@ object LogSQL extends App {
 
 /** Case class for converting RDD to DataFrame */
 case class Record(url: String, status: Int, agent: String)
-
-/** Lazily instantiated singleton instance of SQLContext 
- *  (Straight from included examples in Spark)  */
-object SQLContextSingleton {
-
-  @transient  private var instance: SQLContext = _
-
-  def getInstance(sparkContext: SparkContext): SQLContext = {
-    if (instance == null) {
-      instance = new SQLContext(sparkContext)
-    }
-    instance
-  }
-}
-
-
