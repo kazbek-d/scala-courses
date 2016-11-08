@@ -232,6 +232,13 @@ object advance extends App {
   }
 
 
+  // executionContext executionContext executionContext
+  import java.util.concurrent.Executors
+  import concurrent.ExecutionContext
+  val executorService = Executors.newFixedThreadPool(4)
+  val executionContext = ExecutionContext.fromExecutorService(executorService)
+  // executionContext executionContext executionContext
+
   import Customer._
   implicit val timeout = Timeout(1.second)
 
