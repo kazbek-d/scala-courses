@@ -15,5 +15,6 @@ libraryDependencies ++= Seq(
   "com.m3" %% "curly-scala" % "0.5.+",
   "org.apache.spark" % "spark-core_2.11" % "2.0.0",
   "org.apache.spark" % "spark-sql_2.11" % "2.0.0",
+  "org.apache.spark" % "spark-hive_2.11" % "2.0.2",
   "com.datastax.spark" %% "spark-cassandra-connector" % "2.0.0-M3"
 )

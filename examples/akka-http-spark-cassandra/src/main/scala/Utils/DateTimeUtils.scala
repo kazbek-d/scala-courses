@@ -20,4 +20,6 @@ object DateTimeUtils {
     (0 to java.time.temporal.ChronoUnit.DAYS.between(from.toLocalDate, to.toLocalDate).toInt)
       .map(from.plusDays(_))
       .map(zdt => s"${zdt.getYear}-${zdt.getMonth.getValue}-${zdt.getDayOfMonth}").toList
+
+  implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
 }
