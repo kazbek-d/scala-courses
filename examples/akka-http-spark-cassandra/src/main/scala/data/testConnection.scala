@@ -10,7 +10,7 @@ import org.joda.time.DateTime
 import Utils.DateTimeUtils._
 import com.datastax.driver.core.{ConsistencyLevel, ResultSet, Row}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import Utils.DateTimeUtils._
 import com.datastax.spark.connector.util.ConfigParameter
 import org.apache.spark.sql.catalyst.parser.SqlBaseParser.UnsupportedHiveNativeCommandsContext
@@ -122,7 +122,47 @@ object testHiveJoinContext extends App with init {
   result.foreach(println)
 }
 
+object testHiveWindowing extends App with init {
 
+  // https://cwiki.apache.org/confluence/display/Hive/LanguageManual+WindowingAndAnalytics#LanguageManualWindowingAndAnalytics-EnhancementstoHiveQL
+
+  lazy val spark = SparkSession
+    .builder()
+    .config(conf)
+    .enableHiveSupport()
+    .getOrCreate()
+
+  lazy val rdd = spark.sparkContext.cassandraTable[site_activity_sql_justUrl]("google_analytic", "sa_url")
+
+  import spark.implicits._
+
+  val df: DataFrame = rdd.select("sa_cid", "sa_dl").toDF()
+  df.createOrReplaceTempView("df_sa_url")
+
+  def print(rows : Array[org.apache.spark.sql.Row]) = rows.foreach(println)
+  def testType(index: Int) = index match {
+
+    // PARTITION BY with partitioning, ORDER BY, and window specification
+    case 5 => print(spark.sql("SELECT sa_cid, COUNT(sa_dl) OVER (PARTITION BY sa_cid ORDER BY sa_dl ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) FROM df_sa_url").collect())
+
+    // PARTITION BY with two partitioning columns, two ORDER BY columns, and no window specification
+    case 4 => print(spark.sql("SELECT sa_cid, COUNT(sa_dl) OVER (PARTITION BY sa_cid, sa_dl ORDER BY sa_cid, sa_dl) FROM df_sa_url").collect())
+
+    // PARTITION BY with one partitioning column, one ORDER BY column, and no window specification
+    case 3 => print(spark.sql("SELECT sa_cid, COUNT(sa_dl) OVER (PARTITION BY sa_cid ORDER BY sa_dl) FROM df_sa_url").collect())
+
+    // PARTITION BY with two partitioning columns, no ORDER BY or window specification
+    case 2 => print(spark.sql("SELECT sa_cid, COUNT(sa_dl) OVER (PARTITION BY sa_cid, sa_dl) FROM df_sa_url").collect())
+
+    // PARTITION BY with one partitioning column, no ORDER BY or window specification
+    case 1 => print(spark.sql("SELECT sa_cid, COUNT(sa_dl) OVER (PARTITION BY sa_cid) FROM df_sa_url").collect())
+
+    // Aggregate functions
+    case _ => print(spark.sql("SELECT rank() OVER (ORDER BY count(sa_dl)) FROM df_sa_url GROUP BY sa_cid").collect())
+  }
+
+  testType(5)
+}
 
 
 
