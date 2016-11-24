@@ -1,4 +1,10 @@
-
+//lazy val root = (project in file(".")).
+//  settings(
+//    name := "server",
+//    version := "1.0",
+//    scalaVersion := "2.11.8",
+//    mainClass in Compile := Some("data.testCount")
+//  )
 
 
 name := "server"
@@ -18,3 +24,8 @@ libraryDependencies ++= Seq(
   "org.apache.spark" % "spark-hive_2.11" % "2.0.2",
   "com.datastax.spark" %% "spark-cassandra-connector" % "2.0.0-M3"
 )
+
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
