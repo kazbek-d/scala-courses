@@ -7,13 +7,15 @@ import com.datastax.spark.connector._
 import com.datastax.spark.connector.rdd.CassandraTableScanRDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.joda.time.DateTime
-import Utils.DateTimeUtils._
 import com.datastax.driver.core.{ConsistencyLevel, ResultSet, Row}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import Utils.DateTimeUtils._
 import com.datastax.spark.connector.util.ConfigParameter
 import org.apache.spark.sql.catalyst.parser.SqlBaseParser.UnsupportedHiveNativeCommandsContext
+import org.joda.time.format.DateTimeFormat
+import org.apache.spark.sql.types.{BooleanType => SparkSqlBooleanType, DataType => SparkSqlDataType, DateType => SparkSqlDateType, DecimalType => SparkSqlDecimalType, DoubleType => SparkSqlDoubleType, FloatType => SparkSqlFloatType, MapType => SparkSqlMapType, TimestampType => SparkSqlTimestampType, _}
+
 
 case class site_activity(rowkey: String, sa_cid: String, sa_dl: String, sa_add_date: ZonedDateTime)
 
@@ -25,11 +27,14 @@ case class site_activity_sql_justId(sa_cid: String)
 case class site_activity_sql_justUrl(sa_cid: String, sa_dl: Option[String])
 
 
+case class site_activity_sql_hive(rowkey: String, sa_cid: String, sa_dl: Option[String], sa_add_date: String)
+
 trait init {
 
   lazy val conf = new SparkConf()
     .setAppName("Cassandra Demo")
     .setMaster("local[*]") // spark://spark-master-dbd.qiwi.com:7077
+    //.setMaster("spark://spark-master-dbd.qiwi.com:7077")
     .set("spark.cassandra.connection.host", "spark-worker01-dbd.qiwi.com")
   //.set("spark.cassandra.input.consistency.level", ConsistencyLevel.LOCAL_QUORUM.toString)
 
@@ -132,15 +137,19 @@ object testHiveWindowing extends App with init {
     .enableHiveSupport()
     .getOrCreate()
 
-  lazy val rdd = spark.sparkContext.cassandraTable[site_activity_sql_justUrl]("google_analytic", "sa_url")
+  lazy val rdd = spark.sparkContext.cassandraTable[site_activity_sql_hive]("google_analytic", "sa_url")
 
   import spark.implicits._
 
-  val df: DataFrame = rdd.select("sa_cid", "sa_dl").toDF()
+  val df: DataFrame = rdd.select("rowkey", "sa_cid", "sa_dl", "sa_add_date").toDF()
   df.createOrReplaceTempView("df_sa_url")
 
   def print(rows : Array[org.apache.spark.sql.Row]) = rows.foreach(println)
   def testType(index: Int) = index match {
+
+    // trunc example
+    case 6 => print(spark.sql("SELECT TRUNC(sa_add_date, 'yyyy-MM-dd HH:mm:ss'), COUNT(*) from df_sa_url WHERE sa_add_date >=date'2016-09-30' and sa_add_date <=date'2016-10-30' GROUP BY 1 ORDER BY 1").collect())
+//    case 6 => print(spark.sql("SELECT rowkey, sa_cid, sa_add_date, COUNT(sa_dl) OVER (PARTITION BY sa_add_date) FROM df_sa_url").collect())
 
     // PARTITION BY with partitioning, ORDER BY, and window specification
     case 5 => print(spark.sql("SELECT sa_cid, COUNT(sa_dl) OVER (PARTITION BY sa_cid ORDER BY sa_dl ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) FROM df_sa_url").collect())
@@ -161,7 +170,7 @@ object testHiveWindowing extends App with init {
     case _ => print(spark.sql("SELECT rank() OVER (ORDER BY count(sa_dl)) FROM df_sa_url GROUP BY sa_cid").collect())
   }
 
-  testType(5)
+  testType(6)
 }
 
 
