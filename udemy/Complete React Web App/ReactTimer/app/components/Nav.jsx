@@ -18,8 +18,7 @@ var Nav = React.createClass({
         </div>
         <div className="top-bar-right">
           <ui className="menu">
-            <li className="menu-text">Created by 
-              <a href="https://github.com/kazbek-d/scala-courses/tree/master/udemy/Complete%20React%20Web%20App" target="_blank">Kazbek Dzarasov</a>
+            <li className="menu-text">Created by <a href="https://github.com/kazbek-d/scala-courses/tree/master/udemy/Complete%20React%20Web%20App" target="_blank">Kazbek Dzarasov</a>
             </li>
           </ui>
         </div>
