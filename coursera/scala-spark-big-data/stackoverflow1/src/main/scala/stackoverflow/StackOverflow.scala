@@ -8,6 +8,7 @@ import org.apache.spark.storage.StorageLevel
 
 import annotation.tailrec
 import scala.reflect.ClassTag
+import org.apache.log4j.{Level, Logger}
 
 /** A raw stackoverflow posting, either a question or an answer */
 case class Posting(postingType: Int, id: Int, acceptedAnswer: Option[Int], parentId: Option[Int], score: Int, tags: Option[String]) extends Serializable
@@ -23,6 +24,8 @@ object StackOverflow extends StackOverflow {
   def main(args: Array[String]): Unit = {
 
     val lines = sc.textFile("src/main/resources/stackoverflow/stackoverflow.csv")
+    Logger.getRootLogger.setLevel(Level.ERROR)
+
     val raw = rawPostings(lines)
     val grouped = groupedPostings(raw)    // [questions.id, (question -> answer)]
     val scored = scoredPostings(grouped)  // [question, answer.max_score]
@@ -294,9 +297,9 @@ class StackOverflow extends Serializable {
 
       val dominant = vs.groupBy(_._1).map(g=>(g._1, g._2.map(_._2).sum)).toList.sortBy(_._2).head
       val langLabel: String = langs(dominant._1 / langSpread) // the dominant programming language in the cluster
-      val langPercent: Double = vs.count(_._1 == dominant._1).toDouble / vs.size  // the percent of answers that belong to the dominant language
-      val clusterSize: Int = vs.size // the size of the cluster (the number of questions it contains)
-      val medianScore: Int = averageVectors(vs)._2 // the median of the highest answer scores
+    val langPercent: Double = vs.count(_._1 == dominant._1) * 100D / vs.size  // the percent of answers that belong to the dominant language
+    val clusterSize: Int = vs.size // the size of the cluster (the number of questions it contains)
+    val medianScore: Int = averageVectors(vs)._2 // the median of the highest answer scores
 
       (langLabel, langPercent, clusterSize, medianScore)
     }
@@ -312,3 +315,22 @@ class StackOverflow extends Serializable {
       println(f"${score}%7d  ${lang}%-17s (${percent}%-5.1f%%)      ${size}%7d")
   }
 }
+
+
+
+
+//[Test Description] 'clusterResults' running just 1 iteration on the sampled stackoverflow dataset should return correct result
+//[Observed Error] outputClustersCorrect was false -- the output of clusterResults are not correct
+//[Lost Points] 10
+//
+//[Test Description] 'kmeans' running on the sampled stackoverflow dataset should return correct centroids
+//[Observed Error] outputMeansCorrect was false -- the output means are not correct
+//[Lost Points] 10
+//
+//[Test Description] 'kmeans' running just 1 iteration on the sampled stackoverflow dataset should return correct centroids
+//[Observed Error] outputMeansCorrect was false -- the output means are not correct
+//[Lost Points] 10
+//
+//[Test Description] 'clusterResults' running on the sampled stackoverflow dataset should return correct result
+//[Observed Error] outputClustersCorrect was false -- the output of clusterResults are not correct
+//[Lost Points] 10
