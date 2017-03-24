@@ -97,8 +97,8 @@ object TimeUsage {
     val c = List("t02", "t04", "t06", "t07", "t08", "t09", "t10", "t12", "t13", "t14", "t15", "t16", "t18")
 
     def getCols(pref: List[String]) = columnNames
-        .filter(col => pref.exists(prefix => col.startsWith(prefix)))
-        .map(col => column(col))
+      .filter(col => pref.exists(prefix => col.startsWith(prefix)))
+      .map(col => column(col))
 
     (getCols(a), getCols(b), getCols(c))
   }
@@ -138,13 +138,17 @@ object TimeUsage {
                         otherColumns: List[Column],
                         df: DataFrame
                       ): DataFrame = {
-    val workingStatusProjection: Column = column("telfs")
-    val sexProjection: Column = column("tesex")
-    val ageProjection: Column = column("teage")
+    val workingStatusProjection: Column = when(df("telfs") >= 1 && df("telfs") < 3, "working")
+      .otherwise("not working").as("working")
+    val sexProjection: Column = when(df("tesex") === 1, "male")
+      .otherwise("female").as("sex")
+    val ageProjection: Column = when(df("teage") >= 15 && df("teage") <= 22, "young")
+      .when(df("teage") >= 23 && df("teage") <= 55, "active")
+      .otherwise("elder").as("age")
 
-    val primaryNeedsProjection: Column = expr("(" + primaryNeedsColumns.mkString("+") + ") / 60 as primaryNeeds")
-    val workProjection: Column = expr("(" + workColumns.mkString("+") + ") / 60 as work")
-    val otherProjection: Column = expr("(" + otherColumns.mkString("+") + ") / 60 as other")
+    val primaryNeedsProjection: Column = expr("(" + primaryNeedsColumns.mkString("+") + ") / 60").as("primaryNeeds")
+    val workProjection: Column = expr("(" + workColumns.mkString("+") + ") / 60").as("work")
+    val otherProjection: Column = expr("(" + otherColumns.mkString("+") + ") / 60").as("other")
 
     df
       .select(workingStatusProjection, sexProjection, ageProjection, primaryNeedsProjection, workProjection, otherProjection)
