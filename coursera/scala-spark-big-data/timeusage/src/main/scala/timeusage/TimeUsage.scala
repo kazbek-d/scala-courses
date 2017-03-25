@@ -3,6 +3,7 @@ package timeusage
 import java.nio.file.Paths
 
 import org.apache.spark.sql._
+import org.apache.spark.sql.functions.round
 import org.apache.spark.sql.types._
 
 import scala.collection.immutable.Stream.Empty
@@ -173,7 +174,14 @@ object TimeUsage {
     *               Finally, the resulting DataFrame should be sorted by working status, sex and age.
     */
   def timeUsageGrouped(summed: DataFrame): DataFrame = {
-    ???
+    summed
+      .groupBy("working", "sex", "age")
+      .agg(
+        round(avg("primaryNeeds"), 1).as("primaryNeeds"),
+        round(avg("work"), 1).as("work"),
+        round(avg("other"), 1).as("other")
+      )
+      .sort("working", "sex", "age")
   }
 
   /**
