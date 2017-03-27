@@ -32,10 +32,17 @@ object TimeUsage {
   def timeUsageByLifePeriod(): Unit = {
     val (columns, initDf) = read("/timeusage/atussum.csv")
     val (primaryNeedsColumns, workColumns, otherColumns) = classifiedColumns(columns)
-    val summaryDf = timeUsageSummary(primaryNeedsColumns, workColumns, otherColumns, initDf)
-    //summaryDf.show()
+    val summaryDf = timeUsageSummary(primaryNeedsColumns, workColumns, otherColumns, initDf) //.cache()
+
     val finalDf = timeUsageGrouped(summaryDf)
     finalDf.show()
+
+    //    val finalDfSql = timeUsageGroupedSql(summaryDf)
+    //    finalDfSql.show()
+
+    //    val summed = timeUsageSummaryTyped(summaryDf)
+    //    val finalDfTyped = timeUsageGroupedTyped(summed)
+    //    finalDfTyped.show()
   }
 
   /** @return The read DataFrame along with its column names. */
@@ -93,15 +100,17 @@ object TimeUsage {
     *      “t10”, “t12”, “t13”, “t14”, “t15”, “t16” and “t18” (those which are not part of the previous groups only).
     */
   def classifiedColumns(columnNames: List[String]): (List[Column], List[Column], List[Column]) = {
-    val a = List("t01", "t03", "t11", "t1801", "t1803")
-    val b = List("t05", "t1805")
-    val c = List("t02", "t04", "t06", "t07", "t08", "t09", "t10", "t12", "t13", "t14", "t15", "t16", "t18")
-
     def getCols(pref: List[String]) = columnNames
       .filter(col => pref.exists(prefix => col.startsWith(prefix)))
-      .map(col => column(col))
 
-    (getCols(a), getCols(b), getCols(c))
+    //.map(col => column(col))
+
+    val a = getCols(List("t01", "t03", "t11", "t1801", "t1803"))
+    val b = getCols(List("t05", "t1805"))
+    val c = getCols(List("t02", "t04", "t06", "t07", "t08", "t09", "t10", "t12", "t13", "t14", "t15", "t16", "t18"))
+      .filter(x => !a.contains(x)).filter(x => !b.contains(x))
+
+    (a.map(col => column(col)), b.map(col => column(col)), c.map(col => column(col)))
   }
 
   /** @return a projection of the initial DataFrame such that all columns containing hours spent on primary needs
@@ -198,7 +207,16 @@ object TimeUsage {
     * @param viewName Name of the SQL view to use
     */
   def timeUsageGroupedSqlQuery(viewName: String): String =
-    ???
+    s"""
+       |Select working, sex, age,
+       | ROUND(AVG(primaryNeeds),1) as primaryNeeds,
+       | ROUND(AVG(work),1) as work,
+       | ROUND(AVG(other),1) as other
+       |from $viewName
+
+       |group by working, sex, age
+       |order by working, sex, age
+    """.stripMargin
 
   /**
     * @return A `Dataset[TimeUsageRow]` from the “untyped” `DataFrame`
@@ -208,7 +226,7 @@ object TimeUsage {
     *                           cast them at the same time.
     */
   def timeUsageSummaryTyped(timeUsageSummaryDf: DataFrame): Dataset[TimeUsageRow] =
-    ???
+    timeUsageSummaryDf.as[TimeUsageRow]
 
   /**
     * @return Same as `timeUsageGrouped`, but using the typed API when possible
@@ -222,8 +240,22 @@ object TimeUsage {
     *               Hint: you should use the `groupByKey` and `typed.avg` methods.
     */
   def timeUsageGroupedTyped(summed: Dataset[TimeUsageRow]): Dataset[TimeUsageRow] = {
-    import org.apache.spark.sql.expressions.scalalang.typed
-    ???
+    import org.apache.spark.sql.expressions.scalalang.typed._
+    summed
+      .groupByKey(x => (x.working, x.sex, x.age))
+      .agg(
+        avg(_.primaryNeeds),
+        avg(_.work),
+        avg(_.other)
+      )
+      .map(x => TimeUsageRow(
+        x._1._1,
+        x._1._2,
+        x._1._3,
+        BigDecimal(x._2).setScale(1, BigDecimal.RoundingMode.HALF_UP).toDouble,
+        BigDecimal(x._3).setScale(1, BigDecimal.RoundingMode.HALF_UP).toDouble,
+        BigDecimal(x._4).setScale(1, BigDecimal.RoundingMode.HALF_UP).toDouble))
+      .sort("working", "sex", "age")
   }
 }
 
