@@ -1,9 +1,8 @@
 package observatory
 
 import com.sksamuel.scrimage.{Image, Pixel}
-import SparkImplicits._
-
 import scala.annotation.tailrec
+import scala.collection.immutable.{::, Nil}
 
 
 /**
@@ -52,11 +51,11 @@ object Visualization {
         distance = greatCircleDistance(location, allPoints(i)._1)
 
         if (distance == 0) {
-//          println(">>> predictTemperature:")
-//          println(">>> 1.temperatures:")
-//          allPoints.foreach(println)
-//          println(">>> 2.location:")
-//          println(location)
+          //          println(">>> predictTemperature:")
+          //          println(">>> 1.temperatures:")
+          //          allPoints.foreach(println)
+          //          println(">>> 2.location:")
+          //          println(location)
           total = allPoints(i)._2
           sum = 1
           i = Int.MaxValue
@@ -79,73 +78,51 @@ object Visualization {
     * @return The color that corresponds to `value`, according to the color scale defined by `points`
     */
   def interpolateColor(points: Iterable[(Double, Color)], value: Double): Color = {
-    ???
-    //
-    //    //    println(">>> interpolateColor:")
-    //    //    println(">>> 1.points:")
-    //    //    points.foreach(println)
-    //    //    println(">>> 2.value:")
-    //    //    println(value)
-    //
-    //
-    //    @tailrec
-    //    def loop(xs: Iterable[(Double, Color)], acc: (Double, Int, Double, Int, Color, Color), counter: Int):
-    //    (Option[Color], (Double, Int, Double, Int, Color, Color)) = xs match {
-    //      case Nil => (None, acc)
-    //      case (t, c) :: tail => if (t == value) (Some(c), acc) else {
-    //
-    //        val pr = t < value && (t > acc._1 || acc._1 == value)
-    //        val nx = t > value && (t < acc._3 || acc._3 == value)
-    //
-    //        (
-    //          if (pr) (t, c) else acc._1,
-    //          if (pr) counter else acc._2,
-    //          if (nx) (t, c) else acc._3,
-    //          if (nx) counter else acc._4
-    //        )
-    //
-    //        loop(
-    //          tail,
-    //          (
-    //            if (pr) t else acc._1,
-    //            if (pr) counter else acc._2,
-    //            if (nx) t else acc._3,
-    //            if (nx) counter else acc._4,
-    //            if (pr) c else acc._5,
-    //            if (nx) c else acc._6
-    //          ),
-    //          counter + 1
-    //        )
-    //
-    //      }
-    //    }
-    //
-    //    val indexes = loop(points, (value, 0, value, 0, points.head._2, points.head._2), 0)
-    //
-    //    def tempToColor(temp: Double): Color =
-    //      if (temp >= 60) Color(255, 255, 255)
-    //      else if (temp < 60 && temp >= 32) Color(255, 0, 0)
-    //      else if (temp < 32 && temp >= 12) Color(255, 255, 0)
-    //      else if (temp < 12 && temp >= 0) Color(0, 255, 255)
-    //      else if (temp < 0 && temp >= -15) Color(0, 0, 255)
-    //      else if (temp < -15 && temp >= -27) Color(255, 0, 255)
-    //      else if (temp < -27 && temp >= -50) Color(33, 0, 107)
-    //      else Color(0, 0, 0)
-    //
-    //    val colsMap = List(60, 32, 12, 0, -15, -27, -50, -60).map(t => tempToColor(t) -> t).toMap
-    //
-    //    if (indexes._1.isDefined) {
-    //      indexes._1.get
-    //    }
-    //    else {
-    //      val y_prev = colsMap.getOrElse(indexes._2._5, 0)
-    //      val y_next = colsMap.getOrElse(indexes._2._6, 0)
-    //
-    //      val slope = if (indexes._2._1 != indexes._2._3) 0.0 else (y_next - y_prev) / (indexes._2._3 - indexes._2._1)
-    //      val y_point = y_prev + slope * (value - indexes._2._1)
-    //
-    //      tempToColor(y_point)
-    //    }
+    //    println(">>> interpolateColor:")
+    //    println(">>> 1.points:")
+    //    points.foreach(println)
+    //    println(">>> 2.value:")
+    //    println(value)
+
+    @tailrec
+    def loop(points: List[(Double, Color)], pr: (Double, Color), nx: (Double, Color), c: Option[Color])
+    : ((Double, Color), (Double, Color), Option[Color]) = points match {
+      case Nil => (pr, nx, c)
+      case ::(head, tl) => if (head._1 == value) (pr, nx, Some(head._2)) else {
+        val prev = if (head._1 < value && head._1 > pr._1) head else pr
+        val next = if (head._1 > value && head._1 < nx._1) head else nx
+        loop(tl, prev, next, None)
+      }
+    }
+
+    def y(p1: (Double, Double), p2: (Double, Double), x: Double) = {
+      val k = if ((p2._1 - p1._1) == 0.0) 0.0 else (p2._2 - p1._2) / (p2._1 - p1._1) // angel
+      val b = if ((p2._1 - p1._1) == 0.0) 0.0 else (p2._1 * p1._2 - p1._1 * p2._2) / (p2._1 - p1._1) //offset
+      val res = k * x + b
+      if (res < 0) 0.0 else if (res > 255) 255.0 else res
+    }
+
+    def problem127(i: Int) = if (i == 127) 128 else i
+
+    val list = points.toList
+    val result = loop(list, list.head, list.last, None)
+    if (result._3.isDefined) result._3.get
+    else {
+      val pr = result._1
+      val nx = result._2
+
+      if (pr._2 == nx._2) pr._2
+      else {
+        val r = y((pr._1, pr._2.red), (nx._1, nx._2.red), value)
+        val g = y((pr._1, pr._2.green), (nx._1, nx._2.green), value)
+        val b = y((pr._1, pr._2.blue), (nx._1, nx._2.blue), value)
+        Color(
+          problem127(BigDecimal(r).setScale(0, BigDecimal.RoundingMode.HALF_UP).toInt),
+          problem127(BigDecimal(g).setScale(0, BigDecimal.RoundingMode.HALF_UP).toInt),
+          problem127(BigDecimal(b).setScale(0, BigDecimal.RoundingMode.HALF_UP).toInt))
+      }
+    }
+
   }
 
 
