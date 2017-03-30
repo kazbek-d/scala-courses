@@ -60,5 +60,10 @@ class VisualizationTest extends FunSuite with Checkers {
     assert(result === Color(128, 0, 128))
   }
 
-
+  test("visualize") {
+    val result = Visualization.visualize(
+      List((Location(45.0, -90.0), -9.637508439737758)),
+      List((-9.637508439737758, Color(255, 0, 0)), (-1.0, Color(0, 0, 255))))
+    assert(1 === 1)
+  }
 }

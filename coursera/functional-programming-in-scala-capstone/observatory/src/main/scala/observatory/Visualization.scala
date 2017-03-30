@@ -1,8 +1,12 @@
 package observatory
 
+import javassist.bytecode.ByteArray
+
 import com.sksamuel.scrimage.{Image, Pixel}
+
 import scala.annotation.tailrec
 import scala.collection.immutable.{::, Nil}
+import scala.collection.mutable.ArrayBuffer
 
 
 /**
@@ -78,11 +82,6 @@ object Visualization {
     * @return The color that corresponds to `value`, according to the color scale defined by `points`
     */
   def interpolateColor(points: Iterable[(Double, Color)], value: Double): Color = {
-    //    println(">>> interpolateColor:")
-    //    println(">>> 1.points:")
-    //    points.foreach(println)
-    //    println(">>> 2.value:")
-    //    println(value)
 
     @tailrec
     def loop(points: List[(Double, Color)], pr: (Double, Color), nx: (Double, Color), c: Option[Color])
@@ -133,13 +132,28 @@ object Visualization {
     */
   def visualize(temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image = {
 
-    //    println(">>> visualize:")
-    //    println(">>> 1.temperatures:")
-    //    temperatures.foreach(println)
-    //    println(">>> 2.colors:")
-    //    colors.foreach(println)
+    println(">>> visualize:")
+    println(">>> 1.temperatures:")
+    temperatures.foreach(println)
+    println(">>> 2.colors:")
+    colors.foreach(println)
 
-    ???
+    val w = 360
+    val h = 180
+    val c = colors.toMap
+    val t = temperatures
+      .map(x => (x._1.lat + 180 + (x._1.lon + 90) * w, c(x._2)))
+      .map(x => (x._1.toInt, Pixel(x._2.red, x._2.green, x._2.blue, 100)))
+      .toMap
+    val arr = (0 until w * h).map(_ => Pixel(0)).toArray
+    var i = 0
+    while (i < arr.length) {
+      arr(i) = t.getOrElse(i, Pixel(0))
+      i += 1
+    }
+    require(w * h == arr.length)
+    Image(w, h, arr)
+
   }
 
 }
