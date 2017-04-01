@@ -1,12 +1,10 @@
 package observatory
 
-import javassist.bytecode.ByteArray
 
-import com.sksamuel.scrimage.{Image, Pixel}
+import com.sksamuel.scrimage.Image
 
 import scala.annotation.tailrec
 import scala.collection.immutable.{::, Nil}
-import scala.collection.mutable.ArrayBuffer
 
 
 /**
@@ -55,11 +53,6 @@ object Visualization {
         distance = greatCircleDistance(location, allPoints(i)._1)
 
         if (distance == 0) {
-          //          println(">>> predictTemperature:")
-          //          println(">>> 1.temperatures:")
-          //          allPoints.foreach(println)
-          //          println(">>> 2.location:")
-          //          println(location)
           total = allPoints(i)._2
           sum = 1
           i = Int.MaxValue
@@ -95,8 +88,10 @@ object Visualization {
     }
 
     def y(p1: (Double, Double), p2: (Double, Double), x: Double) = {
-      val k = if ((p2._1 - p1._1) == 0.0) 0.0 else (p2._2 - p1._2) / (p2._1 - p1._1) // angel
-      val b = if ((p2._1 - p1._1) == 0.0) 0.0 else (p2._1 * p1._2 - p1._1 * p2._2) / (p2._1 - p1._1) //offset
+      val k = if ((p2._1 - p1._1) == 0.0) 0.0 else (p2._2 - p1._2) / (p2._1 - p1._1)
+      // angel
+      val b = if ((p2._1 - p1._1) == 0.0) 0.0 else (p2._1 * p1._2 - p1._1 * p2._2) / (p2._1 - p1._1)
+      //offset
       val res = k * x + b
       if (res < 0) 0.0 else if (res > 255) 255.0 else res
     }
@@ -132,30 +127,16 @@ object Visualization {
     */
   def visualize(temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)]): Image = {
 
-    println(">>> visualize:")
-    println(">>> 1.temperatures:")
-    temperatures.foreach(println)
-    println(">>> 2.colors:")
-    colors.foreach(println)
+    ImageHelper.getImage(temperatures, colors)
 
-    val w = 360
-    val h = 180
-    val c = colors.toMap
-    val t = temperatures
-      .map(x => (x._1.lat + 180 + (x._1.lon + 90) * w, c(x._2)))
-      .map(x => (x._1.toInt, Pixel(x._2.red, x._2.green, x._2.blue, 100)))
-      .toMap
-    val arr = (0 until w * h).map(_ => Pixel(0)).toArray
-    var i = 0
-    while (i < arr.length) {
-      arr(i) = t.getOrElse(i, Pixel(0))
-      i += 1
-    }
-    require(w * h == arr.length)
-    Image(w, h, arr)
-
+//    val array =
+//      (0 until 180).flatMap(y => {
+//        (0 until 360).map(x => {
+//          Pixel(255, 0, 0, 127)
+//        })
+//      }).toArray
+//
+//    Image(360, 180, array)
   }
 
 }
-
-
