@@ -1,5 +1,7 @@
 package observatory
 
+import observatory.LayerName.{Deviations, Temperatures}
+
 /**
   * 6th (and last) milestone: user interface polishing
   */
@@ -9,7 +11,10 @@ object Interaction2 {
     * @return The available layers of the application
     */
   def availableLayers: Seq[Layer] = {
-    ???
+    Seq(
+      Layer(Temperatures, Seq.empty, 1 to 10),
+      Layer(Deviations, Seq.empty, 1 to 10)
+    )
   }
 
   /**
@@ -47,7 +52,7 @@ object Interaction2 {
     * @return The caption to show
     */
   def caption(selectedLayer: Signal[Layer], selectedYear: Signal[Int]): Signal[String] = {
-    ???
+    Signal(selectedLayer().layerName + "(" + selectedYear() + ")")
   }
 
 }

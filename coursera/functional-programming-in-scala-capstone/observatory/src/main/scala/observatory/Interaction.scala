@@ -27,14 +27,14 @@ object Interaction {
     */
   def tile(temperatures: Iterable[(Location, Double)], colors: Iterable[(Double, Color)], zoom: Int, x: Int, y: Int): Image = {
 
-    println(">>> tile:")
-    println(">>> 1. temperatures: ")
-    temperatures.foreach(println)
-    println(">>> 2. colors: ")
-    colors.foreach(println)
-    println(">>> 3. zoom: " + zoom)
-    println(">>> 4. x: " + x)
-    println(">>> 5. y: " + y)
+//    println(">>> tile:")
+//    println(">>> 1. temperatures: ")
+//    temperatures.foreach(println)
+//    println(">>> 2. colors: ")
+//    colors.foreach(println)
+//    println(">>> 3. zoom: " + zoom)
+//    println(">>> 4. x: " + x)
+//    println(">>> 5. y: " + y)
 
     ImageHelper.getImage(temperatures, colors,
       256, 256,
