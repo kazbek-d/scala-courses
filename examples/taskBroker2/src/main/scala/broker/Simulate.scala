@@ -20,7 +20,7 @@ object Simulate extends App {
   val r = scala.util.Random
   val data = (1 to 1000).map(increment => {
     val id = LocalDateTime.now plusSeconds increment
-    val callable = new Callable[Unit] {
+    def callable = new Callable[Unit] {
       override def call(): Unit = println(s" Task id: $id")
     }
     Task(id, callable)
@@ -34,11 +34,8 @@ object Simulate extends App {
 
 
   // Run
-  val taskActorRef = system.actorOf(
-    Props(new TaskActor).withRouter(RoundRobinPool(nrOfInstances = 10)), "taskActor")
   val source = Source.fromIterator(() => data.toIterator)
-  val sink = Sink.actorRef(taskActorRef, Unit)
-
+  val sink = Sink.actorRef(system.actorOf(Props(new TaskDispatcher)), Unit)
   source.runWith(sink)
 
 
