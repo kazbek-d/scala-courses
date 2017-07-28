@@ -1,7 +1,8 @@
 import java.net.URL
 
 import Mapper.CustomCol
-import org.apache.spark.sql.types._
+import org.apache.spark.sql.expressions.UserDefinedFunction
+import org.apache.spark.sql.functions.udf
 import org.scalatest.FunSuite
 
 class MapperTest extends FunSuite {
@@ -15,6 +16,7 @@ class MapperTest extends FunSuite {
   }
 
   import Mapper.Hepler
+
   test("Remove rows where any string column is a empty string or just spaces (“”) \nNote : empty string is not same as null") {
     val df = Mapper.read(sampleCSV.toString).removeEmptyStringWithSpaces
     df.show()
@@ -22,10 +24,20 @@ class MapperTest extends FunSuite {
   }
 
   test("Customize DataFrame") {
+    val toString: UserDefinedFunction = udf[Option[String], Option[String]](str => {
+      str.map(_.trim)
+    })
+    val toInt: UserDefinedFunction = udf[Option[String], Option[String]](str => {
+      str.map(_.trim)
+    })
+    val toDate: UserDefinedFunction = udf[Option[String], Option[String]](str => {
+      str.map(_.trim)
+    })
+
     val df = Mapper.read(sampleCSV.toString).removeEmptyStringWithSpaces.customize(Seq(
-      CustomCol("name", "first_name", "string"),
-      CustomCol("age", "total_years", "integer"),
-      CustomCol("birthday", "d_o_b", "timestamp")
+      CustomCol("name", "first_name", toString),
+      CustomCol("age", "total_years", toInt),
+      CustomCol("birthday", "d_o_b", toDate)
     ))
     df.show()
     assert(df.count() == 3)

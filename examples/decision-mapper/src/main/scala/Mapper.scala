@@ -1,11 +1,12 @@
 import SparkImplicits.spark
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.types.DataType
+import org.apache.spark.sql.expressions.UserDefinedFunction
 
 object Mapper {
-  case class CustomCol(existing_col_name: String, new_col_name: String, cast: String)
+  case class CustomCol(existing_col_name: String, new_col_name: String, func: UserDefinedFunction)
 
   def read(path: String): DataFrame = {
+    println(path)
     val df: DataFrame = spark.read.format("CSV").option("header", "true").load(path)
     df.columns.foldLeft(df)((acc, ca) => acc.withColumnRenamed(ca, ca.trim))
   }
@@ -20,9 +21,9 @@ object Mapper {
     def customize(arguments: Seq[CustomCol]): DataFrame = {
       val cols = df.columns
       arguments
-        .foldLeft(df)((acc, ca) => acc.withColumn(ca.new_col_name, df(ca.existing_col_name).cast(ca.cast)))
+        .foldLeft(df)((acc, ca) => acc.withColumn(ca.new_col_name, ca.func(df(ca.existing_col_name))))
         .drop(cols: _*)
-        //.createOrReplaceTempView("df_csv")
+      //.createOrReplaceTempView("df_csv")
       //spark.sql("SELECT * FROM df_csv")
     }
 
