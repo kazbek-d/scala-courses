@@ -1,0 +1,5 @@
+
+
+object Advanced extends App {
+
+}
