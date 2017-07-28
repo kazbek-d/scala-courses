@@ -1,4 +1,5 @@
 import java.net.URL
+import java.sql.Date
 
 import Mapper.CustomCol
 import org.apache.spark.sql.expressions.UserDefinedFunction
@@ -24,14 +25,19 @@ class MapperTest extends FunSuite {
   }
 
   test("Customize DataFrame") {
-    val toString: UserDefinedFunction = udf[Option[String], Option[String]](str => {
-      str.map(_.trim)
+    val toString: UserDefinedFunction = udf[Option[String], String](str => {
+      Option(str).map(_.trim)
     })
-    val toInt: UserDefinedFunction = udf[Option[String], Option[String]](str => {
-      str.map(_.trim)
+    val toInt: UserDefinedFunction = udf[Option[Int], String](str => {
+      Option(str).flatMap(x => try {
+        Some(x.trim.toInt)
+      } catch {
+        case _: Throwable => None
+      })
     })
-    val toDate: UserDefinedFunction = udf[Option[String], Option[String]](str => {
-      str.map(_.trim)
+    val DMYformat = new java.text.SimpleDateFormat("dd-MM-yyyy")
+    val toDate: UserDefinedFunction = udf[Option[Date], String](str => {
+      Option(str).map(x => new Date(DMYformat.parse(x).getTime))
     })
 
     val df = Mapper.read(sampleCSV.toString).removeEmptyStringWithSpaces.customize(Seq(

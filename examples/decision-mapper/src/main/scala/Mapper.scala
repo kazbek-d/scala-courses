@@ -6,7 +6,6 @@ object Mapper {
   case class CustomCol(existing_col_name: String, new_col_name: String, func: UserDefinedFunction)
 
   def read(path: String): DataFrame = {
-    println(path)
     val df: DataFrame = spark.read.format("CSV").option("header", "true").load(path)
     df.columns.foldLeft(df)((acc, ca) => acc.withColumnRenamed(ca, ca.trim))
   }
