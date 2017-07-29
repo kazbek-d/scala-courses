@@ -5,6 +5,7 @@ import org.apache.spark.sql.expressions.UserDefinedFunction
 object Mapper {
 
   case class CustomCol(existing_col_name: String, new_col_name: String, func: UserDefinedFunction)
+  case class ProfileCol(Column: String, Unique_values: Long, Values: Map[Any, Int])
 
   def read(path: String): DataFrame = {
     val df: DataFrame = spark.read.format("CSV").option("header", "true").load(path)
@@ -26,9 +27,11 @@ object Mapper {
         .drop(cols: _*)
     }
 
-    def profiling: DataFrame = {
-      df.createOrReplaceTempView("df_csv")
-      spark.sql("SELECT * FROM df_csv")
+    def profiling: Seq[ProfileCol] = {
+      df.columns.map(col => {
+        val data = df.select(col).filter(row => row(0) != null).rdd.persist()
+        ProfileCol(col, data.distinct().count(), data.map(row => (row(0), 1)).reduceByKey(_ + _).collect().toMap)
+      })
     }
 
   }

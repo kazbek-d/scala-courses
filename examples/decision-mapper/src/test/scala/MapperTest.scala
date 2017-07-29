@@ -55,9 +55,9 @@ class MapperTest extends FunSuite {
 
 
   test("For a given column, provide profiling information\ni.e. total number of unique values, count of each unique value.\nExclude - nulls") {
-    val df = Mapper.read(sampleCSV.toString).removeEmptyStringWithSpaces.customize(customCols).profiling
-    df.show()
-    assert(df.count() == 3)
+    val profile = Mapper.read(sampleCSV.toString).removeEmptyStringWithSpaces.customize(customCols).profiling
+    profile.foreach(println)
+    assert(profile.length == 3)
   }
 
 }
